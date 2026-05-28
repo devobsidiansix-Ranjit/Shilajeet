@@ -9,7 +9,7 @@ services:
     image: shilajit-frontend:latest
     restart: unless-stopped
     networks:
-      - public
+      - traefik
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=Host(`shilajit.apasya.in`)"
@@ -28,7 +28,7 @@ services:
     expose:
       - "5000"
     networks:
-      - public
+      - traefik
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`api.shilajit.apasya.in`)"
@@ -37,5 +37,5 @@ services:
       - "traefik.http.services.backend.loadbalancer.server.port=5000"
 
 networks:
-  public:
-    driver: bridge
+  traefik:
+    external: true
