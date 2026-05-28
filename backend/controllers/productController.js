@@ -12,11 +12,11 @@ export const getProducts = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
   try {
-    const { name, price, oldPrice, grams, supply, imageUrl, videoUrl, features } = req.body;
+    const { name, price, oldPrice, grams, supply, imageUrl, videoUrl, features, dailyLimit, receivedQty, soldQty } = req.body;
     
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
-      { name, price, oldPrice, grams, supply, imageUrl, videoUrl, features },
+      { name, price, oldPrice, grams, supply, imageUrl, videoUrl, features, dailyLimit, receivedQty, soldQty },
       { new: true }
     );
     

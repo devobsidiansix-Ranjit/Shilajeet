@@ -104,3 +104,48 @@ export const getMe = async (req, res) => {
     res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
+
+export const googleSignin = async (req, res) => {
+  try {
+    const { email, name } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ success: false, error: 'Google sign-in requires an email address.' });
+    }
+
+    let user = await User.findOne({ email });
+    if (!user) {
+      // Auto-register new Google user. Phone is required in schema, so we assign a default placeholder '9999999999'
+      user = new User({
+        name: name || 'Google User',
+        email: email,
+        phone: '9999999999',
+        password: await bcrypt.hash(Math.random().toString(36), 10), // Random password
+        role: 'user'
+      });
+      await user.save();
+    }
+
+    const token = jwt.sign(
+      { id: user._id, email: user.email, name: user.name, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      success: true,
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error('Google Signin error:', error);
+    res.status(500).json({ success: false, error: 'Internal server error during Google sign-in' });
+  }
+};
+

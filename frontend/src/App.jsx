@@ -12,8 +12,8 @@ import {
 gsap.registerPlugin(ScrollTrigger);
 
 /* ─── CONFIG ─────────────────────────────── */
-const CONTACT_PHONE = '+91 80856 52729';
-const CONTACT_LINK  = 'tel:+918085652729';
+const CONTACT_EMAIL = 'support@apasya.in';
+const CONTACT_LINK  = 'mailto:support@apasya.in';
 const SELLER_NAME   = 'Amit Kumar';
 const SELLER_TOWN   = 'Satpuraa Range';
 
@@ -38,15 +38,16 @@ const PAINS = [
 
 /* ─── BENEFITS DATA ───────────────────────── */
 const BENEFITS = [
-  { icon: <Zap size={40} color="#b87333" />,        title: 'All-Day Energy',       desc: 'No crash. No caffeine. Real cellular energy from minerals your body actually absorbs.' },
-  { icon: <Brain size={40} color="#b87333" />,       title: 'Mental Clarity',       desc: 'Fulvic acid helps nutrients reach your brain. Clearer thinking, faster recall, better focus.' },
-  { icon: <ShieldCheck size={40} color="#b87333" />, title: 'Stronger Immunity',    desc: '85+ trace minerals rebuild your immune system from the ground up.' },
-  { icon: <Activity size={40} color="#b87333" />,    title: 'Faster Recovery',      desc: 'Athletes use it to recover between sessions. Wake up ready to train again.' },
-  { icon: <Moon size={40} color="#b87333" />,        title: 'Deep Sleep',           desc: 'Minerals regulate your sleep cycle. You\'ll notice the difference within 1 week.' },
-  { icon: <Flame size={40} color="#b87333" />,       title: 'Hormonal Balance',     desc: 'Works for both men and women. Naturally supports the hormones that affect energy and mood.' },
-  { icon: <Smile size={40} color="#b87333" />,       title: 'Gut Health',           desc: 'Ancient digestive support. Reduces bloating, improves nutrient absorption.' },
-  { icon: <Heart size={40} color="#b87333" />,       title: 'Joint & Bone Strength',desc: 'Calcium and magnesium in bioavailable form. Your joints thank you within 2–3 weeks.' },
+  { icon: <Zap size={40} color="#b87333" />,        title: 'All-Day Energy',       desc: 'No crash. No caffeine. Real cellular energy from minerals your body actually absorbs.', image: '/images/benefits/energy.png' },
+  { icon: <Brain size={40} color="#b87333" />,       title: 'Mental Clarity',       desc: 'Fulvic acid helps nutrients reach your brain. Clearer thinking, faster recall, better focus.', image: '/images/benefits/clarity.png' },
+  { icon: <ShieldCheck size={40} color="#b87333" />, title: 'Stronger Immunity',    desc: '85+ trace minerals rebuild your immune system from the ground up.', image: '/images/benefits/immunity.png' },
+  { icon: <Activity size={40} color="#b87333" />,    title: 'Faster Recovery',      desc: 'Athletes use it to recover between sessions. Wake up ready to train again.', image: '/images/benefits/recovery.png' },
+  { icon: <Moon size={40} color="#b87333" />,        title: 'Deep Sleep',           desc: 'Minerals regulate your sleep cycle. You\'ll notice the difference within 1 week.', image: '/images/benefits/sleep.png' },
+  { icon: <Flame size={40} color="#b87333" />,       title: 'Hormonal Balance',     desc: 'Works for both men and women. Naturally supports the hormones that affect energy and mood.', image: '/images/benefits/hormones.png' },
+  { icon: <Smile size={40} color="#b87333" />,       title: 'Gut Health',           desc: 'Ancient digestive support. Reduces bloating, improves nutrient absorption.', image: '/images/benefits/gut.png' },
+  { icon: <Heart size={40} color="#b87333" />,       title: 'Joint & Bone Strength',desc: 'Calcium and magnesium in bioavailable form. Your joints thank you within 2–3 weeks.', image: '/images/benefits/strength.png' },
 ];
+
 
 /* ─── REVIEWS DATA (GRID FROM IMAGE 2) ────── */
 const REVIEWS = [
@@ -208,6 +209,14 @@ export default function App() {
 
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  
+  // Hero section customizable states
+  const [heroSelectedId, setHeroSelectedId] = useState('default_starter');
+  const [heroQty, setHeroQty] = useState(1);
+  const [heroActiveImgIndex, setHeroActiveImgIndex] = useState(0);
+  const heroImages = ['/images/product/product_front.png', '/images/product/product_back.png', '/images/product/product_label.png', '/images/product/product_lifestyle.jpg'];
+
+
   const [formFields, setFormFields] = useState({
     name: '',
     phone1: '',
@@ -299,7 +308,7 @@ export default function App() {
       oldPrice: 1499,
       grams: '10g jar',
       supply: '15-day supply',
-      imageUrl: '/shilajit_jar_mockup.png',
+      imageUrl: '/images/product/product_front.png',
       videoUrl: '/Home.mp4',
       features: ['10g pure rock resin', 'COD available', '15-day money-back guarantee'],
       featured: false
@@ -311,7 +320,7 @@ export default function App() {
       oldPrice: 2999,
       grams: '25g jar',
       supply: '1.5 months supply',
-      imageUrl: '/shilajit_jar_mockup.png',
+      imageUrl: '/images/product/product_front.png',
       videoUrl: '/Home.mp4',
       features: ['25g pure shilajit rock', 'Free fast home shipping', 'COD: Pay when it arrives', '15-day money-back guarantee'],
       featured: true
@@ -338,7 +347,13 @@ export default function App() {
       const res = await fetch(`${BACKEND_API_URL}/products`);
       const data = await res.json();
       if (data.success && data.products && data.products.length > 0) {
-        setProducts(data.products);
+        const mappedProducts = data.products.map(p => {
+          if (p.imageUrl === '/shilajit_jar_mockup.png' || !p.imageUrl) {
+            return { ...p, imageUrl: '/images/product/product_front.png' };
+          }
+          return p;
+        });
+        setProducts(mappedProducts);
       }
     } catch (err) {
       console.error("Error fetching products from server:", err);
@@ -679,6 +694,97 @@ export default function App() {
     }
   };
 
+  const [showGoogleInstructions, setShowGoogleInstructions] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const handleGoogleLogin = async () => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '730097644292-pj8uei33i2s4uh3c8q2d8gg3ve7valsj.apps.googleusercontent.com';
+    if (clientId) {
+      setGoogleLoading(true);
+      try {
+        if (!window.google) {
+          await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://accounts.google.com/gsi/client';
+            script.async = true;
+            script.defer = true;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+          });
+        }
+        
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: async (response) => {
+            try {
+              const payload = JSON.parse(atob(response.credential.split('.')[1]));
+              const res = await fetch(`${BACKEND_API_URL}/auth/google`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  email: payload.email,
+                  name: payload.name,
+                  token: response.credential
+                })
+              });
+              const data = await res.json();
+              if (data.success) {
+                setAuthToken(data.token);
+                setIsAuthOpen(false);
+                setShowGoogleInstructions(false);
+              } else {
+                setAuthError(data.error || 'Google Authentication failed');
+              }
+            } catch (err) {
+              console.error("Google Auth Backend error:", err);
+              setAuthError('Error communicating with backend during Google authentication');
+            } finally {
+              setGoogleLoading(false);
+            }
+          }
+        });
+        
+        window.google.accounts.id.prompt();
+      } catch (err) {
+        console.error("GIS load error:", err);
+        setGoogleLoading(false);
+        setShowGoogleInstructions(true);
+      }
+    } else {
+      setShowGoogleInstructions(prev => !prev);
+    }
+  };
+
+  const handleGoogleSandboxLogin = async () => {
+    setGoogleLoading(true);
+    try {
+      const simulatedPayload = {
+        email: 'sandbox_google_user@gmail.com',
+        name: 'Sandbox Google User'
+      };
+
+      const res = await fetch(`${BACKEND_API_URL}/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(simulatedPayload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAuthToken(data.token);
+        setIsAuthOpen(false);
+        setShowGoogleInstructions(false);
+      } else {
+        setAuthError(data.error || 'Google Sandbox login failed');
+      }
+    } catch (err) {
+      console.error("Google Sandbox auth error:", err);
+      setAuthError('Connection error to authentication server during Google sandbox sign-in');
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
   const handleLogout = () => {
     setAuthToken('');
     setCurrentUser(null);
@@ -854,18 +960,64 @@ export default function App() {
           
           {/* Nav Actions */}
           <div className="navbar__actions">
-            {/* Cart Button */}
+            {/* Buy Now Button (Original Cart Button renamed) */}
             <button 
               onClick={() => setIsCartOpen(true)}
               className="navbar__cart-btn"
             >
-              <ShoppingBag size={16} /> Cart
+              <ShoppingBag size={16} /> BUY NOW
               {cart.reduce((sum, item) => sum + item.quantity, 0) > 0 && (
                 <span className="cart-badge">{cart.reduce((sum, item) => sum + item.quantity, 0)}</span>
               )}
             </button>
+
+            {/* Rounded LOGIN/LOGOUT Button (Image 2 style) */}
+            {currentUser ? (
+              <button 
+                className="navbar__login-btn" 
+                onClick={handleLogout}
+              >
+                LOGOUT
+              </button>
+            ) : (
+              <button 
+                className="navbar__login-btn" 
+                onClick={() => { setAuthTab('login'); setIsAuthOpen(true); }}
+              >
+                LOGIN
+              </button>
+            )}
+
+            {/* Delivery Truck Icon - My Orders (Image 2 style) */}
+            <button 
+              className="navbar__icon-btn" 
+              onClick={() => {
+                if (currentUser) {
+                  handleNavigate('orders');
+                } else {
+                  setAuthTab('login');
+                  setIsAuthOpen(true);
+                }
+              }}
+              title="My Orders"
+            >
+              <Truck size={20} />
+            </button>
+
+            {/* Shopping Bag Icon - Cart with Badge (Image 2 style) */}
+            <button 
+              className="navbar__icon-btn" 
+              style={{ position: 'relative' }}
+              onClick={() => setIsCartOpen(true)}
+              title="Cart"
+            >
+              <ShoppingBag size={20} />
+              {cart.reduce((sum, item) => sum + item.quantity, 0) > 0 && (
+                <span className="cart-icon-badge">{cart.reduce((sum, item) => sum + item.quantity, 0)}</span>
+              )}
+            </button>
             
-            {/* Custom Premium Profile Menu dropdown */}
+            {/* Custom Premium Profile Menu dropdown (Hamburger Trigger) */}
             <div className="profile-menu">
               <button 
                 className="profile-menu__trigger" 
@@ -944,7 +1096,7 @@ export default function App() {
       {activeView === 'home' && (
         <>
           {/* 01 · HERO SECTION */}
-          <section ref={heroRef} className="hero">
+          <section ref={heroRef} className="hero" style={{ alignItems: 'flex-start' }}>
             <div className="hero__left">
               <div className="hero-item hero__tag">
                 Direct from Satpura Range Source (Since 2024)
@@ -957,74 +1109,396 @@ export default function App() {
               <p className="hero-item hero__sub">
                 Pure Satpura Range mineral resin. 85+ minerals. Zero fillers. Zero processing. The same form healers have used for 5,000 years, now available direct from source.
               </p>
-              <div className="hero-item hero__cta-stack">
-                <a href="#pricing" className="btn btn--gold">Get Your Pahadi Shilajit →</a>
-                <a href="#story" className="btn btn--outline">Who am I? Read my story</a>
+
+              {/* Dynamic Price Box (Pic 1 Style) */}
+              {(() => {
+                const currentHeroProduct = products.find(p => p._id === heroSelectedId) || products[0];
+                const heroDiscountPercent = currentHeroProduct?.oldPrice ? Math.round(((currentHeroProduct.oldPrice - currentHeroProduct.price) / currentHeroProduct.oldPrice) * 100) : 33;
+                return (
+                  <>
+                    <div className="hero-item" style={{
+                      background: '#EEF2EB',
+                      border: '1px solid rgba(13,36,23,0.08)',
+                      borderRadius: '16px',
+                      padding: '20px 24px',
+                      marginTop: '20px',
+                      maxWidth: '480px',
+                      boxShadow: '0 4px 12px rgba(13,36,23,0.02)'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '20px', textDecoration: 'line-through', color: '#8C9C8F', fontWeight: 500 }}>₹{currentHeroProduct?.oldPrice}</span>
+                        <span style={{ fontSize: '38px', fontWeight: 800, color: '#0D2417', fontFamily: 'Cormorant Garamond, serif' }}>₹{currentHeroProduct?.price}</span>
+                        <span style={{ fontSize: '20px', fontWeight: 700, color: '#B87333' }}>({heroDiscountPercent}% OFF)</span>
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#8C9C8F', marginTop: '6px', fontWeight: 500 }}>MRP (incl. of all taxes)</div>
+                    </div>
+
+                    {/* Radio buttons for 10g and 25g selection */}
+                    <div className="hero-item" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '20px', maxWidth: '480px' }}>
+                      {products.slice(0, 2).map((p) => {
+                        const isSelected = p._id === heroSelectedId;
+                        const offPercent = p.oldPrice ? Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100) : 33;
+                        return (
+                          <label key={p._id} style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '16px',
+                            background: 'var(--white)',
+                            border: isSelected ? '1.5px solid #B87333' : '1px solid var(--border)',
+                            borderRadius: '12px',
+                            padding: '16px',
+                            cursor: 'pointer',
+                            boxShadow: isSelected ? '0 4px 12px rgba(184,115,51,0.08)' : '0 2px 4px rgba(0,0,0,0.01)',
+                            transition: 'all 0.2s ease'
+                          }}>
+                            <input
+                              type="radio"
+                              name="hero-product-select"
+                              checked={isSelected}
+                              onChange={() => {
+                                setHeroSelectedId(p._id);
+                                setHeroActiveImgIndex(p._id === 'default_best' ? 1 : 0);
+                              }}
+                              style={{
+                                accentColor: '#B87333',
+                                width: '18px',
+                                height: '18px',
+                                cursor: 'pointer'
+                              }}
+                            />
+                            <div style={{ flex: 1 }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--ink)' }}>{p.grams.includes('10') ? '10g Starter Pack' : '25g Best Value Pack'}</span>
+                                <span style={{ fontSize: '15px', fontWeight: 800, color: '#B87333' }}>₹{p.price}</span>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px', fontSize: '12px', color: 'var(--muted)' }}>
+                                <span>{p.supply}</span>
+                                <span style={{ fontWeight: 600, color: '#4ade80' }}>@{offPercent}% OFF</span>
+                              </div>
+                              <div style={{ fontSize: '12px', color: '#B87333', fontWeight: 600, marginTop: '6px', textAlign: 'left' }}>
+                                ⚡ Only {Math.max(0, (p.receivedQty !== undefined ? p.receivedQty : 100) - (p.soldQty !== undefined ? p.soldQty : 0))} packs left today!
+                              </div>
+                            </div>
+                          </label>
+                        );
+                      })}
+                    </div>
+
+                    {/* Quantity selector */}
+                    <div className="hero-item" style={{ marginTop: '24px', maxWidth: '480px' }}>
+                      <div style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--muted)', letterSpacing: '0.08em', marginBottom: '8px' }}>Quantity</div>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        background: 'var(--white)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                        width: '130px',
+                        height: '42px',
+                        overflow: 'hidden',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.01)'
+                      }}>
+                        <button
+                          onClick={() => setHeroQty(prev => Math.max(1, prev - 1))}
+                          style={{
+                            width: '40px',
+                            height: '100%',
+                            background: 'transparent',
+                            border: 'none',
+                            fontSize: '18px',
+                            fontWeight: 600,
+                            color: 'var(--ink)',
+                            cursor: 'pointer',
+                            transition: 'background 0.2s'
+                          }}
+                          onMouseEnter={e => e.target.style.background = '#f9fafb'}
+                          onMouseLeave={e => e.target.style.background = 'transparent'}
+                        >-</button>
+                        <span style={{
+                          flex: 1,
+                          textAlign: 'center',
+                          fontSize: '15px',
+                          fontWeight: 700,
+                          color: 'var(--ink)'
+                        }}>{heroQty}</span>
+                        <button
+                          onClick={() => setHeroQty(prev => prev + 1)}
+                          style={{
+                            width: '40px',
+                            height: '100%',
+                            background: 'transparent',
+                            border: 'none',
+                            fontSize: '18px',
+                            fontWeight: 600,
+                            color: 'var(--ink)',
+                            cursor: 'pointer',
+                            transition: 'background 0.2s'
+                          }}
+                          onMouseEnter={e => e.target.style.background = '#f9fafb'}
+                          onMouseLeave={e => e.target.style.background = 'transparent'}
+                        >+</button>
+                      </div>
+                    </div>
+
+            {/* Add to Cart and Buy Now parallel buttons */}
+            <div className="hero-item" style={{ display: 'flex', gap: '16px', marginTop: '24px', maxWidth: '480px' }}>
+              <button
+                onClick={() => addToCart({ ...currentHeroProduct, quantity: heroQty })}
+                style={{
+                  flex: 1,
+                  height: '48px',
+                  borderRadius: '8px',
+                  background: 'transparent',
+                  border: '1.5px solid #B87333',
+                  color: '#B87333',
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={e => { e.target.style.background = 'rgba(184,115,51,0.05)' }}
+                onMouseLeave={e => { e.target.style.background = 'transparent' }}
+              >
+                <ShoppingBag size={16} /> Add to Cart
+              </button>
+              <button
+                onClick={() => openCheckout({
+                  _id: currentHeroProduct._id,
+                  name: `${currentHeroProduct.name} (x${heroQty})`,
+                  price: currentHeroProduct.price * heroQty,
+                  grams: currentHeroProduct.grams,
+                  supply: currentHeroProduct.supply,
+                  imageUrl: currentHeroProduct.imageUrl
+                })}
+                style={{
+                  flex: 1,
+                  height: '48px',
+                  borderRadius: '8px',
+                  background: '#B87333',
+                  border: 'none',
+                  color: 'white',
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  transition: 'background 0.2s'
+                }}
+                onMouseEnter={e => { e.target.style.background = '#995a22' }}
+                onMouseLeave={e => { e.target.style.background = '#B87333' }}
+              >
+                Buy Now
+              </button>
+            </div>
+          </>
+        );
+      })()}
+    </div>
+
+          {/* Right side product image carousel */}
+          <div className="hero__right" style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            justifyContent: 'flex-start', 
+            alignItems: 'center', 
+            padding: '80px 16px 32px', 
+            gap: '16px',
+            height: 'auto',
+            minHeight: '100%',
+            background: '#FAF6F0'
+          }}>
+            <div style={{
+              position: 'relative',
+              borderRadius: 24,
+              overflow: 'hidden',
+              boxShadow: '0 30px 80px rgba(13,36,23,0.15), 0 0 0 2px rgba(184,115,51,0.25)',
+              maxWidth: '640px', width: '100%',
+              aspectRatio: '1/1',
+              background: '#FAF6F0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <img
+                src={heroImages[heroActiveImgIndex]}
+                alt="Original Pahadi Shilajit"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
+              />
+
+              <button
+                onClick={() => setHeroActiveImgIndex(prev => prev === 0 ? heroImages.length - 1 : prev - 1)}
+                style={{
+                  position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)',
+                  width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255,255,255,0.85)',
+                  border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)', color: '#0D2417', zIndex: 10, transition: 'background 0.2s'
+                }}
+                onMouseEnter={e => e.target.style.background = '#ffffff'}
+                onMouseLeave={e => e.target.style.background = 'rgba(255,255,255,0.85)'}
+              >
+                <ChevronLeft size={20} />
+              </button>
+
+              <button
+                onClick={() => setHeroActiveImgIndex(prev => prev === heroImages.length - 1 ? 0 : prev + 1)}
+                style={{
+                  position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)',
+                  width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255,255,255,0.85)',
+                  border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)', color: '#0D2417', zIndex: 10, transition: 'background 0.2s'
+                }}
+                onMouseEnter={e => e.target.style.background = '#ffffff'}
+                onMouseLeave={e => e.target.style.background = 'rgba(255,255,255,0.85)'}
+              >
+                <ChevronRight size={20} />
+              </button>
+
+              <div style={{
+                position: 'absolute', top: 16, left: 16, zIndex: 5,
+                background: 'rgba(13,36,23,0.9)', border: '1px solid rgba(184,115,51,0.5)',
+                borderRadius: 8, padding: '5px 12px', fontSize: 11, fontWeight: 700,
+                color: 'var(--gold)', letterSpacing: '0.06em', backdropFilter: 'blur(4px)'
+              }}>✨ 85+ Minerals</div>
+
+              <div style={{
+                position: 'absolute', bottom: 16, right: 16, zIndex: 5,
+                background: 'rgba(13,36,23,0.9)', border: '1px solid rgba(184,115,51,0.6)',
+                borderRadius: 8, padding: '5px 12px', fontSize: 11, fontWeight: 700,
+                color: '#4ade80', backdropFilter: 'blur(4px)'
+              }}>✓ Pure resin</div>
+            </div>
+
+            {/* Thumbnails */}
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', width: '100%', flexWrap: 'wrap' }}>
+              {heroImages.map((img, idx) => {
+                const isActive = idx === heroActiveImgIndex;
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => setHeroActiveImgIndex(idx)}
+                    style={{
+                      padding: 0,
+                      width: '76px',
+                      height: '76px',
+                      borderRadius: '8px',
+                      overflow: 'hidden',
+                      cursor: 'pointer',
+                      border: isActive ? '2.5px solid #B87333' : '1px solid rgba(13,36,23,0.1)',
+                      boxShadow: isActive ? '0 4px 8px rgba(184,115,51,0.15)' : 'none',
+                      background: '#FFF',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <img src={img} alt={`thumbnail-${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* 4 Square Trust Badges (Image 4 Style Redesign) */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '16px',
+              width: '100%',
+              maxWidth: '640px',
+              marginTop: '16px'
+            }}>
+              {/* Box 1: COD Available */}
+              <div style={{
+                background: 'var(--white)',
+                border: '1.5px solid rgba(13,36,23,0.06)',
+                borderRadius: '16px',
+                padding: '20px 16px',
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.015)',
+                transition: 'all 0.2s ease'
+              }} className="hero-trust-box">
+                <div style={{ color: 'var(--earth)', marginBottom: '8px' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><path d="M6 14h.01M10 14h.01M14 14h.01M18 14h.01"/></svg>
+                </div>
+                <h4 style={{ fontSize: '12px', fontWeight: 700, color: 'var(--earth)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 6px 0' }}>COD Available</h4>
+                <div style={{ width: '24px', height: '1px', background: 'rgba(13,36,23,0.12)', margin: '0 auto 8px' }} />
+                <p style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: 1.4, margin: 0 }}>Pay in cash when your package arrives safely.</p>
               </div>
-              <div className="hero-item hero__trust">
-                <div className="hero__trust-item"><span className="hero__trust-check">✓</span> COD Available</div>
-                <div className="hero__trust-item"><span className="hero__trust-check">✓</span> Ships in 24 hrs</div>
-                <div className="hero__trust-item"><span className="hero__trust-check">✓</span> 15-day guarantee</div>
-                <div className="hero__trust-item"><span className="hero__trust-check">✓</span> 500+ customers</div>
+
+              {/* Box 2: Ships in 24 hrs */}
+              <div style={{
+                background: 'var(--white)',
+                border: '1.5px solid rgba(13,36,23,0.06)',
+                borderRadius: '16px',
+                padding: '20px 16px',
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.015)',
+                transition: 'all 0.2s ease'
+              }} className="hero-trust-box">
+                <div style={{ color: 'var(--earth)', marginBottom: '8px' }}>
+                  <Truck size={24} strokeWidth={1.5} />
+                </div>
+                <h4 style={{ fontSize: '12px', fontWeight: 700, color: 'var(--earth)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 6px 0' }}>Ships in 24 hrs</h4>
+                <div style={{ width: '24px', height: '1px', background: 'rgba(13,36,23,0.12)', margin: '0 auto 8px' }} />
+                <p style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: 1.4, margin: 0 }}>Dispatched within 24 hours via express delivery.</p>
+              </div>
+
+              {/* Box 3: 15-day Guarantee */}
+              <div style={{
+                background: 'var(--white)',
+                border: '1.5px solid rgba(13,36,23,0.06)',
+                borderRadius: '16px',
+                padding: '20px 16px',
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.015)',
+                transition: 'all 0.2s ease'
+              }} className="hero-trust-box">
+                <div style={{ color: 'var(--earth)', marginBottom: '8px' }}>
+                  <ShieldCheck size={24} strokeWidth={1.5} />
+                </div>
+                <h4 style={{ fontSize: '12px', fontWeight: 700, color: 'var(--earth)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 6px 0' }}>15-day Guarantee</h4>
+                <div style={{ width: '24px', height: '1px', background: 'rgba(13,36,23,0.12)', margin: '0 auto 8px' }} />
+                <p style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: 1.4, margin: 0 }}>Try it at home. Satisfied or full money-back refund.</p>
+              </div>
+
+              {/* Box 4: 500+ Customers */}
+              <div style={{
+                background: 'var(--white)',
+                border: '1.5px solid rgba(13,36,23,0.06)',
+                borderRadius: '16px',
+                padding: '20px 16px',
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.015)',
+                transition: 'all 0.2s ease'
+              }} className="hero-trust-box">
+                <div style={{ color: 'var(--earth)', marginBottom: '8px' }}>
+                  <Users size={24} strokeWidth={1.5} />
+                </div>
+                <h4 style={{ fontSize: '12px', fontWeight: 700, color: 'var(--earth)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 6px 0' }}>500+ Customers</h4>
+                <div style={{ width: '24px', height: '1px', background: 'rgba(13,36,23,0.12)', margin: '0 auto 8px' }} />
+                <p style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: 1.4, margin: 0 }}>Trusted by hundreds of healthy individuals in India.</p>
               </div>
             </div>
-            <div className="hero__right" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '16px' }}>
-              <div className="float-anim" style={{
-                position: 'relative',
-                borderRadius: 24,
-                overflow: 'hidden',
-                boxShadow: '0 30px 80px rgba(13,36,23,0.3), 0 0 0 2px rgba(184,115,51,0.4)',
-                maxWidth: 800, width: '100%',
-                aspectRatio: '16/9',
-                background: '#000'
-              }}>
-                {/* Golden ring border accent */}
-                <div style={{
-                  position: 'absolute', inset: 0, zIndex: 2, borderRadius: 24,
-                  boxShadow: 'inset 0 0 0 2px rgba(184,115,51,0.5)',
-                  pointerEvents: 'none'
-                }} />
-
-                {/* Floating badges */}
-                <div style={{
-                  position: 'absolute', top: 14, left: 14, zIndex: 10,
-                  background: 'rgba(13,36,23,0.9)', border: '1px solid rgba(184,115,51,0.5)',
-                  borderRadius: 8, padding: '5px 10px', fontSize: 11, fontWeight: 700,
-                  color: 'var(--gold)', letterSpacing: '0.06em', backdropFilter: 'blur(4px)'
-                }}>✨ 85+ Minerals</div>
-
-                <div style={{
-                  position: 'absolute', bottom: 14, right: 14, zIndex: 10,
-                  background: 'rgba(13,36,23,0.9)', border: '1px solid rgba(184,115,51,0.6)',
-                  borderRadius: 8, padding: '5px 10px', fontSize: 11, fontWeight: 700,
-                  color: '#4ade80', backdropFilter: 'blur(4px)'
-                }}>✓ Zero Additives</div>
-
-                <div style={{
-                  position: 'absolute', bottom: 14, left: 14, zIndex: 10,
-                  background: 'rgba(13,36,23,0.9)', border: '1px solid rgba(184,115,51,0.5)',
-                  borderRadius: 8, padding: '5px 10px', fontSize: 11, fontWeight: 700,
-                  color: 'var(--gold)', backdropFilter: 'blur(4px)'
-                }}>🌱 Fulvic Acid Rich</div>
-
-                {/* THE HERO VIDEO (DYNAMIC FROM DB OR FALLBACK) */}
-                <video
-                  ref={videoRef}
-                  src={products[1]?.videoUrl || "/Home.mp4"}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    display: 'block',
-                    objectFit: 'cover',
-                    background: '#000'
-                  }}
-                />
-              </div>
-            </div>
+          </div>
           </section>
 
           {/* 02 · TRUST BAR / TICKER */}
@@ -1042,6 +1516,55 @@ export default function App() {
               <div className="ticker__item">↩ 15-day money-back guarantee<span className="ticker__sep"></span></div>
             </div>
           </div>
+
+          {/* WHY APASYA? (Kapiva-Style Redesign) */}
+          <section className="why-apasya" style={{ background: '#FAF6F0', padding: '80px 0', borderBottom: '1px solid var(--border)' }}>
+            <div className="container">
+              <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+                <p className="label" style={{ letterSpacing: '0.12em', color: '#B87333', marginBottom: '12px' }}>THE APASYA DIFFERENCE</p>
+                <h2 className="h2" style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(36px, 4vw, 52px)', color: '#0D2417', margin: 0 }}>WHY APASYA?</h2>
+                <div style={{ width: '60px', height: '3px', background: '#B87333', margin: '20px auto 0' }} />
+              </div>
+
+              <div className="why-apasya__grid">
+                {/* Pillar 1: Direct from Satpura */}
+                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(27,61,43,0.06)', color: 'var(--earth)' }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 22h20L12 2z"/><path d="M12 2v20"/><path d="M8 12h8"/></svg>
+                  </div>
+                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--earth)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Direct from Satpura</h3>
+                  <p style={{ fontSize: '14px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '240px', margin: 0 }}>Sourced directly from Satpura Range rock formations. No middleman, direct since 2024.</p>
+                </div>
+
+                {/* Pillar 2: Raw Rock Resin */}
+                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(27,61,43,0.06)', color: 'var(--earth)' }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                  </div>
+                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--earth)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Raw Rock Resin</h3>
+                  <p style={{ fontSize: '14px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '240px', margin: 0 }}>Sun-dried raw mineral resin in its natural, unprocessed form. Zero fillers, zero processing.</p>
+                </div>
+
+                {/* Pillar 3: 85+ Trace Minerals */}
+                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(27,61,43,0.06)', color: 'var(--earth)' }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+                  </div>
+                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--earth)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>85+ Minerals</h3>
+                  <p style={{ fontSize: '14px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '240px', margin: 0 }}>High concentration of active fulvic acid and trace minerals for maximum cellular absorption.</p>
+                </div>
+
+                {/* Pillar 4: Lab Certified */}
+                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(27,61,43,0.06)', color: 'var(--earth)' }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  </div>
+                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--earth)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Lab Certified</h3>
+                  <p style={{ fontSize: '14px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '240px', margin: 0 }}>Rigorous laboratory testing for safety. 100% free from heavy metals or artificial chemicals.</p>
+                </div>
+              </div>
+            </div>
+          </section>
 
           {/* 03 · PAIN / PROBLEM SECTION */}
           <section className="problem" id="problem">
@@ -1134,14 +1657,20 @@ export default function App() {
                 <p className="body-text">Most brands market only one benefit. Real Shilajit works on all of these at the same time.</p>
               </div>
               <div className="benefits__grid reveal">
-                {BENEFITS.map(({ icon, title, desc }) => (
-                  <div key={title} className="benefit">
-                    <div style={{ marginBottom: 14 }}>{icon}</div>
-                    <div className="benefit__title">{title}</div>
-                    <div className="benefit__text">{desc}</div>
+                {BENEFITS.map(({ icon, title, desc, image }) => (
+                  <div key={title} className="benefit" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', background: 'var(--white)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 4px 20px rgba(0,0,0,0.01)', transition: 'all 0.3s ease' }}>
+                    <div style={{ width: '100%', height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '16px', overflow: 'hidden', borderRadius: '12px', background: 'transparent' }}>
+                      <img src={image} alt={title} style={{ height: '100%', objectFit: 'contain' }} />
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', justifyContent: 'center' }}>
+                      {icon}
+                      <div className="benefit__title" style={{ margin: 0, fontSize: '18px', fontWeight: 700 }}>{title}</div>
+                    </div>
+                    <div className="benefit__text" style={{ fontSize: '14px', color: 'var(--muted)', lineHeight: 1.5 }}>{desc}</div>
                   </div>
                 ))}
               </div>
+
             </div>
           </section>
 
@@ -1214,7 +1743,7 @@ export default function App() {
               <div className="purity__grid">
                 <div className="reveal">
                   <p className="label">Nothing to hide</p>
-                  <h2 className="h2">Test it at home. In 30 seconds.</h2>
+                  <h2 className="h2">Test it at home. Any Time</h2>
                   <p className="body-text">We give you this test because we are confident in what we sell. The moment your order arrives, try this:</p>
                   <div className="purity__steps">
                     <div className="purity__step">
@@ -1227,7 +1756,7 @@ export default function App() {
                     </div>
                     <div className="purity__step">
                       <div className="purity__step-num">3</div>
-                      <div className="purity__step-text">Watch it dissolve in under 30 seconds.</div>
+                      <div className="purity__step-text">Watch it dissolve at Any Time.</div>
                     </div>
                     <div className="purity__step">
                       <div className="purity__step-num">4</div>
@@ -1263,7 +1792,7 @@ export default function App() {
                     <hr className="purity__quote-divider" />
 
                     <div className="purity__quote-text">
-                      "We are giving you the test because we have nothing to hide. Try it the moment your order arrives. If it doesn't pass, call us at {CONTACT_PHONE}. Full refund. Same day."
+                      "We are giving you the test because we have nothing to hide. Try it the moment your order arrives. If it doesn't pass, email us at {CONTACT_EMAIL}. Full refund. Same day."
                     </div>
                   </div>
                 </div>
@@ -1345,7 +1874,7 @@ export default function App() {
                   </div>
                   <div className="story__wa" style={{ marginTop: 24 }}>
                     <a href={CONTACT_LINK} className="btn btn--phone">
-                      <Phone size={18} /> Call Me Directly: {CONTACT_PHONE}
+                      ✉️ Contact: {CONTACT_EMAIL}
                     </a>
                   </div>
                 </div>
@@ -1373,6 +1902,9 @@ export default function App() {
                     </p>
                     <h3 className="price-card__name">{p.name.includes('Starter') ? 'Try It' : 'Commit to Health'}</h3>
                     <p className="price-card__grams">{p.grams} · {p.supply}</p>
+                    <div style={{ fontSize: '13px', color: '#B87333', fontWeight: 700, margin: '8px 0', textAlign: 'center' }}>
+                      ⚡ Only {Math.max(0, (p.receivedQty !== undefined ? p.receivedQty : 100) - (p.soldQty !== undefined ? p.soldQty : 0))} packs left today!
+                    </div>
                     {p.oldPrice && <div className="price-card__old">₹{p.oldPrice}</div>}
                     <div className="price-card__price">₹{p.price}</div>
                     <p className="price-card__per">/ one-time</p>
@@ -1415,7 +1947,7 @@ export default function App() {
                   <span style={{ fontSize: 18 }}>↩</span><span>15-day money-back guarantee</span>
                 </div>
                 <div className="pricing__trust-item">
-                  <span style={{ fontSize: 18 }}>📱</span><span>Phone Call: {CONTACT_PHONE}</span>
+                  <span style={{ fontSize: 18 }}>✉️</span><span>Contact: {CONTACT_EMAIL}</span>
                 </div>
               </div>
             </div>
@@ -1427,7 +1959,7 @@ export default function App() {
               <div className="reveal shield-pulse guarantee__shield">🛡️</div>
               <h2 className="reveal h2">Try it for 15 days, or your money back</h2>
               <p className="reveal body-text">
-                If you don't feel a difference in your energy, focus, or sleep within 15 days, call me at {CONTACT_PHONE}. I will refund you fully. No questions asked. No forms to fill. No waiting.
+                If you don't feel a difference in your energy, focus, or sleep within 15 days, email me at {CONTACT_EMAIL}. I will refund you fully. No questions asked. No forms to fill. No waiting.
               </p>
               <p className="reveal" style={{ fontSize: 15, fontStyle: 'italic', fontWeight: 600, color: 'var(--gold2)', marginBottom: 32 }}>
                 "I would rather you trust me completely than keep any money. That is my promise to you."
@@ -1455,13 +1987,13 @@ export default function App() {
                   Yes, I Want Original Rock Shilajit →
                 </a>
                 <a href={CONTACT_LINK} className="btn btn--phone">
-                  <Phone size={18} /> Order via Call: {CONTACT_PHONE}
+                  ✉️ Order via Email: {CONTACT_EMAIL}
                 </a>
               </div>
               <div className="final-cta__trust reveal">
                 <div>✓ COD available: pay only when it arrives</div>
                 <div>✓ Free shipping on 2-pack and above</div>
-                <div>✓ Call us anytime: {CONTACT_PHONE}</div>
+                <div>✓ Contact us anytime: {CONTACT_EMAIL}</div>
               </div>
               <div className="scarcity reveal">
                 <div className="scarcity__dot"></div>
@@ -1538,6 +2070,130 @@ export default function App() {
             </div>
           </section>
         </>
+      )}
+
+      {/* ══════════════════════════════════════
+          POLICY VIEWS (PRIVACY, TERMS, SHIPPING, CANCELLATION)
+      ══════════════════════════════════════ */}
+      {['privacy', 'terms', 'shipping', 'cancellation'].includes(activeView) && (
+        <section className="dashboard-view" style={{ minHeight: '80vh', padding: '60px 20px', background: 'var(--cream)' }}>
+          <div className="container" style={{ maxWidth: '800px', margin: '0 auto', background: 'var(--white)', padding: '40px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
+            <button className="dashboard-back-btn" onClick={() => setActiveView('home')} style={{ marginBottom: '32px' }}>
+              ← Back to Homepage
+            </button>
+            
+            {activeView === 'privacy' && (
+              <div style={{ textAlign: 'left' }}>
+                <h1 className="h2" style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '36px', color: '#0D2417', marginBottom: '24px' }}>Privacy Policy</h1>
+                <p style={{ fontSize: '14px', color: 'var(--muted)', marginBottom: '24px' }}>Last updated: May 28, 2026</p>
+                <div className="policy-content" style={{ fontSize: '15px', lineHeight: '1.8', color: 'var(--text)', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <p>At <strong>Apasya</strong> (registered under Apasya Natural Products), accessible from <a href="https://apasya.in" style={{ color: '#B87333', textDecoration: 'none' }}>apasya.in</a>, one of our main priorities is the privacy of our visitors. This Privacy Policy document contains types of information that is collected and recorded by Apasya and how we use it.</p>
+                  
+                  <h3 style={{ fontSize: '18px', color: 'var(--earth)', fontWeight: 700, marginTop: '12px' }}>1. Consent</h3>
+                  <p>By using our website, you hereby consent to our Privacy Policy and agree to its terms.</p>
+                  
+                  <h3 style={{ fontSize: '18px', color: 'var(--earth)', fontWeight: 700, marginTop: '12px' }}>2. Information We Collect</h3>
+                  <p>The personal information that you are asked to provide, and the reasons why you are asked to provide it, will be made clear to you at the point we ask you to provide your personal information.</p>
+                  <p>If you purchase products from us, we collect shipping details (name, delivery address, phone numbers) to successfully fulfill your order. Payments are processed securely via our trusted payment gateway partner PhonePe, and we do not store your credit card or raw banking credentials on our servers.</p>
+                  
+                  <h3 style={{ fontSize: '18px', color: 'var(--earth)', fontWeight: 700, marginTop: '12px' }}>3. How We Use Your Information</h3>
+                  <p>We use the information we collect in various ways, including to:</p>
+                  <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <li>Provide, operate, and maintain our website and e-commerce services.</li>
+                    <li>Process transactions, track and fulfill shipments of Apasya Shilajit.</li>
+                    <li>Communicate with you regarding order confirmations, live delivery timelines, and customer support.</li>
+                    <li>Prevent fraudulent transactions and secure our systems.</li>
+                  </ul>
+                  
+                  <h3 style={{ fontSize: '18px', color: 'var(--earth)', fontWeight: 700, marginTop: '12px' }}>4. Log Files</h3>
+                  <p>Apasya follows a standard procedure of using log files. These files log visitors when they visit websites. The information collected by log files includes internet protocol (IP) addresses, browser type, Internet Service Provider (ISP), date and time stamp, referring/exit pages, and possibly the number of clicks. These are not linked to any information that is personally identifiable.</p>
+                  
+                  <h3 style={{ fontSize: '18px', color: 'var(--earth)', fontWeight: 700, marginTop: '12px' }}>5. Third Party Privacy Policies</h3>
+                  <p>Apasya's Privacy Policy does not apply to other advertisers or websites. Thus, we are advising you to consult the respective Privacy Policies of these third-party servers like Google (for OAuth) and PhonePe (for payment gateways) for more detailed information.</p>
+                  
+                  <h3 style={{ fontSize: '18px', color: 'var(--earth)', fontWeight: 700, marginTop: '12px' }}>6. Contact Us</h3>
+                  <p>If you have additional questions or require more information about our Privacy Policy, do not hesitate to contact us at <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: '#B87333', textDecoration: 'none', fontWeight: 600 }}>{CONTACT_EMAIL}</a>.</p>
+                </div>
+              </div>
+            )}
+
+            {activeView === 'terms' && (
+              <div style={{ textAlign: 'left' }}>
+                <h1 className="h2" style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '36px', color: '#0D2417', marginBottom: '24px' }}>Terms &amp; Conditions</h1>
+                <p style={{ fontSize: '14px', color: 'var(--muted)', marginBottom: '24px' }}>Last updated: May 28, 2026</p>
+                <div className="policy-content" style={{ fontSize: '15px', lineHeight: '1.8', color: 'var(--text)', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <p>Welcome to <strong>Apasya</strong>! These terms and conditions outline the rules and regulations for the use of Apasya Natural Products' Website, located at <a href="https://apasya.in" style={{ color: '#B87333', textDecoration: 'none' }}>apasya.in</a>.</p>
+                  <p>By accessing this website, we assume you accept these terms and conditions. Do not continue to use Apasya if you do not agree to take all of the terms and conditions stated on this page.</p>
+                  
+                  <h3 style={{ fontSize: '18px', color: 'var(--earth)', fontWeight: 700, marginTop: '12px' }}>1. E-Commerce Purchases</h3>
+                  <p>By placing an order for Starter Pack (10g) or Best Value Pack (25g), you warrant that you are at least 18 years of age and are capable of entering into legally binding agreements. You agree to provide accurate, complete, and current information for all purchases.</p>
+                  
+                  <h3 style={{ fontSize: '18px', color: 'var(--earth)', fontWeight: 700, marginTop: '12px' }}>2. Pricing and Availability</h3>
+                  <p>All prices listed on the site are in Indian Rupees (INR) and are inclusive of applicable taxes unless specified otherwise. We reserve the right to modify prices or adjust daily inventory limit caps without prior notice. If a product becomes unavailable after order placement, we will contact you to issue a complete refund.</p>
+                  
+                  <h3 style={{ fontSize: '18px', color: 'var(--earth)', fontWeight: 700, marginTop: '12px' }}>3. Disclaimer &amp; Wellness Use</h3>
+                  <p>Apasya Shilajit is a raw mineral resin. Sourced directly from Satpura Range formations, it is 100% natural and free from chemical additives. However, the descriptions and dietary claims on this website have not been evaluated by the Food and Drug Administration (FDA) or equivalent local authorities. The product is not intended to diagnose, treat, cure, or prevent any disease. Results may vary between individuals.</p>
+                  
+                  <h3 style={{ fontSize: '18px', color: 'var(--earth)', fontWeight: 700, marginTop: '12px' }}>4. Limitation of Liability</h3>
+                  <p>In no event shall Apasya, nor any of its officers, directors, and employees, be held liable for anything arising out of or in any way connected with your use of this website or consumption of the products, whether such liability is under contract or tort.</p>
+                  
+                  <h3 style={{ fontSize: '18px', color: 'var(--earth)', fontWeight: 700, marginTop: '12px' }}>5. Contact</h3>
+                  <p>If you have any queries regarding our terms, please reach out to us at <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: '#B87333', textDecoration: 'none', fontWeight: 600 }}>{CONTACT_EMAIL}</a>.</p>
+                </div>
+              </div>
+            )}
+
+            {activeView === 'shipping' && (
+              <div style={{ textAlign: 'left' }}>
+                <h1 className="h2" style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '36px', color: '#0D2417', marginBottom: '24px' }}>Shipping Policy</h1>
+                <p style={{ fontSize: '14px', color: 'var(--muted)', marginBottom: '24px' }}>Last updated: May 28, 2026</p>
+                <div className="policy-content" style={{ fontSize: '15px', lineHeight: '1.8', color: 'var(--text)', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <p>Thank you for choosing <strong>Apasya</strong>. We want to deliver your fresh mountain-sourced Shilajit pack as quickly and safely as possible. Below are the terms and conditions that constitute our Shipping Policy.</p>
+                  
+                  <h3 style={{ fontSize: '18px', color: 'var(--earth)', fontWeight: 700, marginTop: '12px' }}>1. Shipment Processing Time</h3>
+                  <p>All orders are processed and handed over to our shipping courier partners within <strong>24 hours</strong> of transaction confirmation. Orders are not packed or shipped on Sundays or national holidays.</p>
+                  <p>If we are experiencing a high volume of orders or if daily inventory limits are reached, shipments may be slightly delayed. In case of significant delay, we will reach out to you via SMS or email immediately.</p>
+                  
+                  <h3 style={{ fontSize: '18px', color: 'var(--earth)', fontWeight: 700, marginTop: '12px' }}>2. Shipping Rates &amp; Delivery Estimates</h3>
+                  <p>Shipping charges for your order will be calculated and displayed during checkout. Currently, we offer free shipping across India for our Best Value Pack (25g jar) or standard cart checkouts. Standard shipping rates may apply on single Starter Pack orders.</p>
+                  <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <li><strong>Standard Express Shipping:</strong> Delivery typically takes 3-5 business days from dispatch for metro cities, and 4-7 business days for regional areas.</li>
+                    <li><strong>Cash on Delivery (COD):</strong> Available throughout major pincodes in India at no additional convenience fee. Pay in cash or UPI at your doorstep when the package is delivered.</li>
+                  </ul>
+                  
+                  <h3 style={{ fontSize: '18px', color: 'var(--earth)', fontWeight: 700, marginTop: '12px' }}>3. Shipment Confirmation &amp; Order Tracking</h3>
+                  <p>You will receive a shipment confirmation notification once your order is dispatched. You can track your shipment status live on our <strong>My Orders</strong> dashboard page at any time by entering your transaction ID.</p>
+                  
+                  <h3 style={{ fontSize: '18px', color: 'var(--earth)', fontWeight: 700, marginTop: '12px' }}>4. Damages &amp; Lost Packages</h3>
+                  <p>If your package arrives in a damaged or tampered state, please do not accept it from the courier. If it is already received, take a photo and contact us immediately at <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: '#B87333', textDecoration: 'none', fontWeight: 600 }}>{CONTACT_EMAIL}</a>. We will dispatch a fresh replacement package at no additional cost.</p>
+                </div>
+              </div>
+            )}
+
+            {activeView === 'cancellation' && (
+              <div style={{ textAlign: 'left' }}>
+                <h1 className="h2" style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '36px', color: '#0D2417', marginBottom: '24px' }}>Cancellation &amp; Refund Policy</h1>
+                <p style={{ fontSize: '14px', color: 'var(--muted)', marginBottom: '24px' }}>Last updated: May 28, 2026</p>
+                <div className="policy-content" style={{ fontSize: '15px', lineHeight: '1.8', color: 'var(--text)', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <p>At <strong>Apasya</strong>, we believe in the absolute quality of our pure Satpura Range Shilajit. We want you to feel entirely secure in your purchase decision.</p>
+                  
+                  <h3 style={{ fontSize: '18px', color: 'var(--earth)', fontWeight: 700, marginTop: '12px' }}>1. Order Cancellation</h3>
+                  <p>You may request to cancel your order within <strong>2 hours</strong> of placing it, as long as it has not been packed or handed over to our shipping couriers. To cancel, please email us directly at <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: '#B87333', textDecoration: 'none', fontWeight: 600 }}>{CONTACT_EMAIL}</a> with your transaction details. Once shipped, cancellations cannot be processed.</p>
+                  
+                  <h3 style={{ fontSize: '18px', color: 'var(--earth)', fontWeight: 700, marginTop: '12px' }}>2. 15-Day Money-Back Guarantee</h3>
+                  <p>We offer a hassle-free <strong>15-Day Money-Back Guarantee</strong>. If you are genuinely unsatisfied with the quality of our Shilajit, or if it does not meet your expectations, you can request a refund within 15 days of receiving the delivery.</p>
+                  <p>To initiate a refund under this guarantee, please contact our support team at <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: '#B87333', textDecoration: 'none', fontWeight: 600 }}>{CONTACT_EMAIL}</a> explaining your experience. Our direct-from-source model means we handle every customer query personally.</p>
+                  
+                  <h3 style={{ fontSize: '18px', color: 'var(--earth)', fontWeight: 700, marginTop: '12px' }}>3. Damaged or Faulty Items</h3>
+                  <p>If you receive a package that is damaged or tampered, contact us within 48 hours of delivery. We will issue a 100% refund or ship a replacement jar at no extra cost.</p>
+                  
+                  <h3 style={{ fontSize: '18px', color: 'var(--earth)', fontWeight: 700, marginTop: '12px' }}>4. Refund Fulfillments</h3>
+                  <p>Approved refunds will be processed and credited back to your original source of payment (for online payments) or bank account (for COD orders) within <strong>5-7 business days</strong>. A confirmation email will be sent once the refund transaction is initiated from our side.</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
       )}
 
       {/* ══════════════════════════════════════
@@ -1806,6 +2462,12 @@ export default function App() {
                   onClick={() => setAdminTab('products')}
                 >
                   <Settings size={13} style={{ display: 'inline', marginRight: 4, verticalAlign: 'middle' }} /> Product Customizer
+                </button>
+                <button 
+                  className={`admin-tab-btn ${adminTab === 'inventory' ? 'admin-tab-btn--active' : ''}`}
+                  onClick={() => setAdminTab('inventory')}
+                >
+                  <TrendingUp size={13} style={{ display: 'inline', marginRight: 4, verticalAlign: 'middle' }} /> Inventory Control
                 </button>
               </div>
             </div>
@@ -2106,6 +2768,117 @@ export default function App() {
                     )}
                   </div>
                 )}
+
+                {/* SUBTAB 4: INVENTORY CONTROL */}
+                {adminTab === 'inventory' && (
+                  <div>
+                    <h3 className="h3" style={{ borderBottom: '1px solid var(--border)', paddingBottom: 12, marginBottom: 20 }}>
+                      Daily Inventory &amp; Stock Limits Manager
+                    </h3>
+                    
+                    <div style={{ background: 'var(--white)', border: '1px solid var(--border)', borderRadius: 12, padding: 24, boxShadow: '0 4px 12px rgba(0,0,0,0.015)' }}>
+                      <table className="admin-orders-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+                        <thead>
+                          <tr style={{ background: 'var(--warm)', borderBottom: '1.5px solid var(--border)' }}>
+                            <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 700 }}>Product Pack</th>
+                            <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 700 }}>Daily Limit</th>
+                            <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 700 }}>Total Received Stock</th>
+                            <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 700 }}>Sold Stock</th>
+                            <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 700 }}>Stock Left</th>
+                            <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 700 }}>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {products.map(p => {
+                            const stockLeft = Math.max(0, (p.receivedQty || 100) - (p.soldQty || 0));
+                            return (
+                              <tr key={p._id} style={{ borderBottom: '1px solid var(--border)' }}>
+                                <td style={{ padding: '16px', fontWeight: 600, color: 'var(--ink)' }}>
+                                  {p.name} ({p.grams})
+                                </td>
+                                <td style={{ padding: '16px', textAlign: 'center' }}>
+                                  <input 
+                                    type="number" 
+                                    className="form-input" 
+                                    style={{ width: '80px', textAlign: 'center', padding: '6px', margin: '0 auto' }} 
+                                    defaultValue={p.dailyLimit || 50}
+                                    id={`limit-${p._id}`}
+                                  />
+                                </td>
+                                <td style={{ padding: '16px', textAlign: 'center' }}>
+                                  <input 
+                                    type="number" 
+                                    className="form-input" 
+                                    style={{ width: '90px', textAlign: 'center', padding: '6px', margin: '0 auto' }} 
+                                    defaultValue={p.receivedQty || 100}
+                                    id={`received-${p._id}`}
+                                  />
+                                </td>
+                                <td style={{ padding: '16px', textAlign: 'center' }}>
+                                  <input 
+                                    type="number" 
+                                    className="form-input" 
+                                    style={{ width: '80px', textAlign: 'center', padding: '6px', margin: '0 auto' }} 
+                                    defaultValue={p.soldQty || 0}
+                                    id={`sold-${p._id}`}
+                                  />
+                                </td>
+                                <td style={{ padding: '16px', textAlign: 'center', fontWeight: 700, color: stockLeft <= 10 ? '#ef4444' : 'var(--green2)' }}>
+                                  {stockLeft} units
+                                </td>
+                                <td style={{ padding: '16px', textAlign: 'center' }}>
+                                  <button
+                                    className="btn btn--gold"
+                                    style={{ padding: '8px 12px', fontSize: '12px', width: 'auto', border: 'none', cursor: 'pointer' }}
+                                    onClick={async () => {
+                                      const dailyLimit = parseInt(document.getElementById(`limit-${p._id}`).value);
+                                      const receivedQty = parseInt(document.getElementById(`received-${p._id}`).value);
+                                      const soldQty = parseInt(document.getElementById(`sold-${p._id}`).value);
+                                      
+                                      try {
+                                        const res = await fetch(`${BACKEND_API_URL}/products/${p._id}`, {
+                                          method: 'PUT',
+                                          headers: { 
+                                            'Content-Type': 'application/json',
+                                            'Authorization': `Bearer ${authToken}` 
+                                          },
+                                          body: JSON.stringify({ 
+                                            name: p.name,
+                                            price: p.price,
+                                            oldPrice: p.oldPrice,
+                                            grams: p.grams,
+                                            supply: p.supply,
+                                            imageUrl: p.imageUrl,
+                                            videoUrl: p.videoUrl,
+                                            features: p.features,
+                                            dailyLimit,
+                                            receivedQty,
+                                            soldQty
+                                          })
+                                        });
+                                        const data = await res.json();
+                                        if (data.success) {
+                                          alert('Inventory metrics updated successfully for ' + p.name);
+                                          fetchProducts();
+                                        } else {
+                                          alert('Error updating inventory: ' + data.error);
+                                        }
+                                      } catch (err) {
+                                        alert('Network error updating inventory: ' + err.message);
+                                      }
+                                    }}
+                                  >
+                                    Save
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -2115,27 +2888,95 @@ export default function App() {
       {/* ══════════════════════════════════════
           FOOTER (RENDERS ON ALL VIEWS)
       ══════════════════════════════════════ */}
-      <footer style={{ background: 'var(--ink)', padding: '48px 24px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-        <div className="container" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
-            <p style={{ fontSize: 13, color: 'rgba(245,237,224,0.6)' }}>
-              Mountain's Real Shilajit · From Satpuraa Range · Phone: {CONTACT_PHONE}
-            </p>
-            <div style={{ display: 'flex', gap: 20 }}>
-              {[['#pricing', 'Pricing'], ['#story', 'Seller Story'], [CONTACT_LINK, `Call Us: ${CONTACT_PHONE}`]].map(([href, label]) => (
-                <a key={label} href={href} onClick={() => setActiveView('home')}
-                  style={{ fontSize: 13, color: 'rgba(245,237,224,0.6)', textDecoration: 'none', transition: 'color 0.2s' }}
-                  onMouseEnter={e => e.target.style.color = 'var(--gold)'}
-                  onMouseLeave={e => e.target.style.color = 'rgba(245,237,224,0.6)'}
-                >{label}</a>
-              ))}
+      <footer style={{ background: '#ffffff', color: '#0D2417', padding: '64px 24px 32px', borderTop: '1px solid rgba(13,36,23,0.08)', fontFamily: 'Inter, sans-serif' }}>
+        <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '48px' }}>
+          
+          {/* Main Footer Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '40px' }}>
+            
+            {/* Column 1: Logo & Info */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <img src="/logo.png" alt="APASYA" style={{ height: '48px', width: 'auto', alignSelf: 'flex-start' }} />
+              <p style={{ fontSize: '14px', lineHeight: '1.6', color: 'rgba(13,36,23,0.7)', margin: 0 }}>
+                No 16-1 and 17-2, Vaishnavi Tech Park,<br />
+                Ambalipura Village, Varthur Hobli, Varthur,<br />
+                Bengaluru, Karnataka 560103
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px' }}>
+                <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: '#B87333', textDecoration: 'none', fontWeight: 600 }}>✉️ {CONTACT_EMAIL}</a>
+              </div>
+            </div>
+
+            {/* Column 2: Navigation Links */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px 24px' }}>
+                <a href="#my-account" onClick={(e) => { e.preventDefault(); setAuthTab('login'); setIsAuthOpen(true); }} style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.05em', color: '#0D2417', textDecoration: 'none', textTransform: 'uppercase' }}>MY ACCOUNT</a>
+                <a href="#about-us" onClick={(e) => { e.preventDefault(); handleNavigate('home'); }} style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.05em', color: '#0D2417', textDecoration: 'none', textTransform: 'uppercase' }}>ABOUT US</a>
+                <a href="#faq" onClick={(e) => { e.preventDefault(); handleNavigate('home'); }} style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.05em', color: '#0D2417', textDecoration: 'none', textTransform: 'uppercase' }}>FAQS</a>
+                <a href="#contact-us" onClick={(e) => { e.preventDefault(); handleNavigate('home'); }} style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.05em', color: '#0D2417', textDecoration: 'none', textTransform: 'uppercase' }}>CONTACT US</a>
+              </div>
+            </div>
+
+            {/* Column 3: Newsletter & Social */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <h4 style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', margin: 0, textTransform: 'uppercase', color: '#0D2417' }}>JOIN OUR MAILING LIST</h4>
+                <div style={{ display: 'flex', borderBottom: '1px solid rgba(13,36,23,0.15)', paddingBottom: '8px' }}>
+                  <input type="email" placeholder="Enter Email" style={{ background: 'transparent', border: 'none', outline: 'none', color: '#0D2417', fontSize: '14px', width: '100%', padding: '4px 0' }} />
+                  <button style={{ background: 'transparent', border: 'none', color: '#B87333', cursor: 'pointer', padding: '0 8px' }}>→</button>
+                </div>
+              </div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <h4 style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', margin: 0, textTransform: 'uppercase', color: '#0D2417' }}>FOLLOW US</h4>
+                <div style={{ display: 'flex', gap: '20px' }}>
+                  {['instagram', 'facebook', 'youtube', 'twitter'].map(platform => (
+                    <a key={platform} href={`https://${platform}.com`} target="_blank" rel="noreferrer" style={{ color: 'rgba(13,36,23,0.6)', transition: 'color 0.2s' }}>
+                      {platform === 'instagram' && (
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+                          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                        </svg>
+                      )}
+                      {platform === 'facebook' && (
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+                          <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                        </svg>
+                      )}
+                      {platform === 'youtube' && (
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+                          <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
+                          <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
+                        </svg>
+                      )}
+                      {platform === 'twitter' && (
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+                          <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+                        </svg>
+                      )}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Bottom Copyright & Policy Links */}
+          <div style={{ borderTop: '1px solid rgba(13,36,23,0.08)', paddingTop: '24px', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '16px', fontSize: '12px', color: 'rgba(13,36,23,0.5)' }}>
+            <div>© {new Date().getFullYear()} APASYA Pure Satpura Shilajit. All rights reserved.</div>
+            <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+              <button onClick={() => { setActiveView('privacy'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{ background: 'transparent', border: 'none', color: 'rgba(13,36,23,0.6)', cursor: 'pointer', padding: 0, font: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.target.style.color = '#B87333'} onMouseLeave={e => e.target.style.color = 'rgba(13,36,23,0.6)'}>Privacy Policy</button>
+              <button onClick={() => { setActiveView('terms'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{ background: 'transparent', border: 'none', color: 'rgba(13,36,23,0.6)', cursor: 'pointer', padding: 0, font: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.target.style.color = '#B87333'} onMouseLeave={e => e.target.style.color = 'rgba(13,36,23,0.6)'}>Terms & Conditions</button>
+              <button onClick={() => { setActiveView('shipping'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{ background: 'transparent', border: 'none', color: 'rgba(13,36,23,0.6)', cursor: 'pointer', padding: 0, font: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.target.style.color = '#B87333'} onMouseLeave={e => e.target.style.color = 'rgba(13,36,23,0.6)'}>Shipping Policy</button>
+              <button onClick={() => { setActiveView('cancellation'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{ background: 'transparent', border: 'none', color: 'rgba(13,36,23,0.6)', cursor: 'pointer', padding: 0, font: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.target.style.color = '#B87333'} onMouseLeave={e => e.target.style.color = 'rgba(13,36,23,0.6)'}>Cancellation Policy</button>
             </div>
           </div>
-          <p style={{ fontSize: 11, color: 'rgba(245,237,224,0.35)', lineHeight: 1.7, textAlign: 'center', maxWidth: 800, margin: '0 auto', fontStyle: 'italic' }}>
-            Disclaimer: Results vary by individual. Consult a physician if pregnant, nursing, or on medication. This product is not intended to diagnose, treat, cure, or prevent any disease. COD provided via Shiprocket/Delhivery.
-          </p>
+
         </div>
       </footer>
+
 
       {/* ══════════════════════════════════════
           STICKY MOBILE CTA BAR (RENDERS ONLY ON HOME)
@@ -2206,9 +3047,9 @@ export default function App() {
                 <button className="btn btn--outline" onClick={() => setPaymentResult(null)} style={{ width: '100%', marginBottom: 12 }}>
                   Retry Checkout
                 </button>
-                <button className="btn btn--phone" onClick={closeCheckout} style={{ width: '100%' }}>
-                  Order via Call Instead
-                </button>
+                <a href={CONTACT_LINK} className="btn btn--phone" style={{ width: '100%', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  Order via Email Instead
+                </a>
               </div>
             )}
 
@@ -2217,7 +3058,7 @@ export default function App() {
                 <div className="checkout-modal__header">
                   <h3 className="h3" style={{ marginBottom: 4 }}>Secure Checkout</h3>
                   <p style={{ fontSize: 13, color: 'var(--muted)' }}>
-                    Complete your order in 30 seconds
+                    Complete your order Any Time
                   </p>
                 </div>
 
@@ -2458,9 +3299,90 @@ export default function App() {
               <button type="submit" className="btn btn--gold" style={{ width: '100%', marginTop: 12, border: 'none', cursor: 'pointer' }}>
                 {authTab === 'login' ? 'Sign In' : 'Create Account'}
               </button>
+
+              <div style={{ display: 'flex', alignItems: 'center', margin: '20px 0 16px', gap: '8px' }}>
+                <div style={{ flex: 1, height: '1px', background: 'var(--border)' }}></div>
+                <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 500 }}>or</span>
+                <div style={{ flex: 1, height: '1px', background: 'var(--border)' }}></div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                disabled={googleLoading}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '12px',
+                  background: 'var(--white)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  color: 'var(--ink)',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+                  transition: 'background 0.2s'
+                }}
+                onMouseEnter={e => e.target.style.background = '#f9fafb'}
+                onMouseLeave={e => e.target.style.background = 'var(--white)'}
+              >
+                <svg viewBox="0 0 24 24" width="18" height="18" style={{ display: 'block' }}>
+                  <path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.54 15.01 1 12 1 7.35 1 3.39 3.67 1.4 7.56l3.88 3C6.22 7.76 8.87 5.04 12 5.04z" />
+                  <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.46c-.29 1.48-1.14 2.73-2.4 3.58l3.73 2.89c2.18-2 3.7-5.01 3.7-8.62z" />
+                  <path fill="#FBBC05" d="M5.28 14.56c-.25-.76-.39-1.57-.39-2.4 0-.83.14-1.64.39-2.4l-3.88-3C.54 8.24 0 10.06 0 12s.54 3.76 1.4 5.44l3.88-3z" />
+                  <path fill="#34A853" d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.73-2.89c-1.1.74-2.52 1.18-4.23 1.18-3.13 0-5.78-2.72-6.72-5.52l-3.88 3C3.39 20.33 7.35 23 12 23z" />
+                </svg>
+                {googleLoading ? 'Connecting...' : 'Continue with Google'}
+              </button>
+
+              {showGoogleInstructions && (
+                <div style={{ marginTop: '20px', background: '#F5EDE0', border: '1px solid rgba(184,115,51,0.3)', borderRadius: '12px', padding: '16px', animation: 'fadeIn 0.3s ease' }}>
+                  <h4 style={{ margin: '0 0 8px', fontSize: '14px', fontWeight: 700, color: 'var(--gold2)' }}>Google OAuth Setup Guide</h4>
+                  <p style={{ margin: '0 0 12px', fontSize: '12px', lineHeight: '1.5', color: 'var(--text)' }}>
+                    To configure real Google Login in your project, complete these developer credentials steps:
+                  </p>
+                  <ol style={{ margin: '0 0 16px', paddingLeft: '20px', fontSize: '11px', lineHeight: '1.6', color: 'var(--text)' }}>
+                    <li>Go to the <a href="https://console.cloud.google.com/" target="_blank" rel="noreferrer" style={{ color: 'var(--gold2)', fontWeight: 600 }}>Google Cloud Console</a>.</li>
+                    <li>Create a project, navigate to <strong>APIs & Services &gt; Credentials</strong>.</li>
+                    <li>Click <strong>Create Credentials &gt; OAuth Client ID</strong> (Web Application).</li>
+                    <li>Add <code>http://localhost:5173</code> to <strong>Authorized JavaScript origins</strong>.</li>
+                    <li>Copy your <strong>Client ID</strong>.</li>
+                    <li>Create a <code>.env</code> file in the <code>frontend/</code> root folder and add:<br />
+                      <code style={{ background: 'rgba(0,0,0,0.05)', padding: '2px 4px', borderRadius: '4px', fontSize: '10px', wordBreak: 'break-all', display: 'inline-block', marginTop: '4px' }}>VITE_GOOGLE_CLIENT_ID=your_copied_client_id</code>
+                    </li>
+                    <li>In <code>backend/.env</code>, add:<br />
+                      <code style={{ background: 'rgba(0,0,0,0.05)', padding: '2px 4px', borderRadius: '4px', fontSize: '10px', wordBreak: 'break-all', display: 'inline-block', marginTop: '4px' }}>GOOGLE_CLIENT_ID=your_copied_client_id</code>
+                    </li>
+                  </ol>
+                  <button
+                    type="button"
+                    onClick={handleGoogleSandboxLogin}
+                    style={{
+                      width: '100%',
+                      background: 'var(--gold)',
+                      border: 'none',
+                      borderRadius: '6px',
+                      padding: '8px',
+                      color: 'white',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      transition: 'background 0.2s'
+                    }}
+                    onMouseEnter={e => e.target.style.background = 'var(--gold2)'}
+                    onMouseLeave={e => e.target.style.background = 'var(--gold)'}
+                  >
+                    Proceed with Sandbox Demo Login
+                  </button>
+                </div>
+              )}
             </form>
           </div>
         </div>
+
       )}
 
       {/* ══════════════════════════════════════

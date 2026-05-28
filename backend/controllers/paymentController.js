@@ -1,5 +1,6 @@
 import { StandardCheckoutClient, Env, StandardCheckoutPayRequest } from '@phonepe-pg/pg-sdk-node';
 import { Order } from '../models/Order.js';
+import { Product } from '../models/Product.js';
 
 // PhonePe Credentials from environment or defaults
 const clientId = process.env.PHONEPE_CLIENT_ID || "M22SGYECP7TW5_2605211959";
@@ -132,8 +133,22 @@ export const verifyPayment = async (req, res) => {
           });
           await newOrder.save();
           console.log(`Saved new PAID order for txn ${transactionId} (was missing pending order)`);
+
+          // Increment soldQty
+          await Product.findOneAndUpdate(
+            { name: order.productName },
+            { $inc: { soldQty: order.quantity || 1 } }
+          );
+          console.log(`Incremented soldQty for product "${order.productName}" by ${order.quantity || 1}`);
         } else {
           console.log(`Updated pending order to PAID for txn ${transactionId}`);
+
+          // Increment soldQty using updatedOrder.productName
+          await Product.findOneAndUpdate(
+            { name: updatedOrder.productName },
+            { $inc: { soldQty: updatedOrder.quantity || 1 } }
+          );
+          console.log(`Incremented soldQty for product "${updatedOrder.productName}" by ${updatedOrder.quantity || 1}`);
         }
       } catch (dbError) {
         console.error("Error saving/updating order in MongoDB:", dbError);

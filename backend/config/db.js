@@ -47,14 +47,17 @@ async function seedDatabase() {
           oldPrice: 1499,
           grams: '10g jar',
           supply: '15-day supply',
-          imageUrl: '/shilajit_jar_mockup.png',
+          imageUrl: '/images/product/product_front.png',
           videoUrl: '/Home.mp4',
           features: [
             '10g pure rock resin',
             'COD available',
             '15-day money-back guarantee'
           ],
-          featured: false
+          featured: false,
+          dailyLimit: 50,
+          receivedQty: 100,
+          soldQty: 0
         },
         {
           name: 'Best Value Pack',
@@ -62,7 +65,7 @@ async function seedDatabase() {
           oldPrice: 2999,
           grams: '25g jar',
           supply: '1.5 months supply',
-          imageUrl: '/shilajit_jar_mockup.png',
+          imageUrl: '/images/product/product_front.png',
           videoUrl: '/Home.mp4',
           features: [
             '25g pure shilajit rock',
@@ -70,11 +73,20 @@ async function seedDatabase() {
             'COD: Pay when it arrives',
             '15-day money-back guarantee'
           ],
-          featured: true
+          featured: true,
+          dailyLimit: 50,
+          receivedQty: 100,
+          soldQty: 0
         }
       ];
       await Product.insertMany(defaultProducts);
       console.log('🌱 Default Products seeded successfully');
+    } else {
+      // Ensure existing products have inventory properties
+      await Product.updateMany({ dailyLimit: { $exists: false } }, { $set: { dailyLimit: 50 } });
+      await Product.updateMany({ receivedQty: { $exists: false } }, { $set: { receivedQty: 100 } });
+      await Product.updateMany({ soldQty: { $exists: false } }, { $set: { soldQty: 0 } });
+      console.log('🌱 Existing products verified and updated with inventory fields');
     }
   } catch (error) {
     console.error('Database seeding error:', error);
