@@ -12,9 +12,11 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=Host(`shilajit.apasya.in`)" # root domain
-      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.entrypoints=web,websecure"
       - "traefik.http.routers.frontend.tls.certresolver=myresolver"
+      - "traefik.http.routers.frontend.network=public"
       - "traefik.http.services.frontend.loadbalancer.server.port=80"
+
 
   backend:
     build:
@@ -30,13 +32,16 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`api.shilajit.apasya.in`)"
-      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.entrypoints=web,websecure"
       - "traefik.http.routers.backend.tls.certresolver=myresolver"
+      - "traefik.http.routers.backend.network=public"
       - "traefik.http.services.backend.loadbalancer.server.port=5000"
+
 
 networks:
   public:
-    driver: bridge
+    external: true
+
 
 volumes:
   letsencrypt:
