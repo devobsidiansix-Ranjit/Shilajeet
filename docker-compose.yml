@@ -12,10 +12,10 @@ services:
       - traefik
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.shilajit-frontend.rule=Host(`shilajit.apasya.in`)"
-      - "traefik.http.routers.shilajit-frontend.entrypoints=web,websecure"
-      - "traefik.http.routers.shilajit-frontend.tls.certresolver=myresolver"
-      - "traefik.http.services.shilajit-frontend.loadbalancer.server.port=80"
+      - "traefik.http.routers.frontend.rule=Host(`shilajit.apasya.in`)"
+      - "traefik.http.routers.frontend.entrypoints=web,websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=myresolver"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
 
   backend:
     build:
@@ -31,10 +31,10 @@ services:
       - traefik
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.shilajit-backend.rule=Host(`api.shilajit.apasya.in`)"
-      - "traefik.http.routers.shilajit-backend.entrypoints=web,websecure"
-      - "traefik.http.routers.shilajit-backend.tls.certresolver=myresolver"
-      - "traefik.http.services.shilajit-backend.loadbalancer.server.port=5000"
+      - "traefik.http.routers.backend.rule=Host(`api.shilajit.apasya.in`)"
+      - "traefik.http.routers.backend.entrypoints=web,websecure"
+      - "traefik.http.routers.backend.tls.certresolver=myresolver"
+      - "traefik.http.services.backend.loadbalancer.server.port=5000"
 
 networks:
   traefik:
