@@ -282,6 +282,15 @@ export default function App() {
     }
   }, [location]);
 
+  // Auto-play slider for Hero Images (interval of 4 seconds, resets on user action)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setHeroActiveImgIndex((prev) => (prev === heroImages.length - 1 ? 0 : prev + 1));
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [heroActiveImgIndex, heroImages.length]);
+
+
   const handleNavigate = (view) => {
     if (view === 'home') navigate('/');
     if (view === 'orders') navigate('/orders');
@@ -1331,9 +1340,10 @@ export default function App() {
                 style={{
                   width: '100%',
                   height: '100%',
-                  objectFit: 'cover'
+                  objectFit: heroActiveImgIndex === 2 ? 'contain' : 'cover'
                 }}
               />
+
 
               <button
                 onClick={() => setHeroActiveImgIndex(prev => prev === 0 ? heroImages.length - 1 : prev - 1)}
