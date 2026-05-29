@@ -1,27 +1,28 @@
-
-
 services:
-
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     image: shilajit-frontend:latest
+    container_name: shilajeet-frontend-app
     restart: unless-stopped
     networks:
       - traefik
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`shilajit.apasya.in`)"
-      - "traefik.http.routers.frontend.entrypoints=web,websecure"
-      - "traefik.http.routers.frontend.tls.certresolver=myresolver"
-      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+      # 👇 Using unique namespaced router tags to avoid collisions with hotel-bhopal-inn
+      - "traefik.http.routers.shilajit-fe.rule=Host(`shilajit.apasya.in`)"
+      - "traefik.http.routers.shilajit-fe.entrypoints=web,websecure"
+      - "traefik.http.routers.shilajit-fe.tls=true"
+      - "traefik.http.routers.shilajit-fe.tls.certresolver=myresolver"
+      - "traefik.http.services.shilajit-fe.loadbalancer.server.port=80"
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     image: shilajit-backend:latest
+    container_name: shilajeet-backend-api
     restart: unless-stopped
     environment:
       - NODE_ENV=production
@@ -31,10 +32,12 @@ services:
       - traefik
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`api.shilajit.apasya.in`)"
-      - "traefik.http.routers.backend.entrypoints=web,websecure"
-      - "traefik.http.routers.backend.tls.certresolver=myresolver"
-      - "traefik.http.services.backend.loadbalancer.server.port=5000"
+      # 👇 Unique namespaced router tags for backend routing isolation
+      - "traefik.http.routers.shilajit-be.rule=Host(`api.shilajit.apasya.in`)"
+      - "traefik.http.routers.shilajit-be.entrypoints=web,websecure"
+      - "traefik.http.routers.shilajit-be.tls=true"
+      - "traefik.http.routers.shilajit-be.tls.certresolver=myresolver"
+      - "traefik.http.services.shilajit-be.loadbalancer.server.port=5000"
 
 networks:
   traefik:

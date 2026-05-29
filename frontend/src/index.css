@@ -261,23 +261,13 @@ a { text-decoration: none; }
 .problem__card-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.8) 0%,
-    rgba(0, 0, 0, 0.45) 50%,
-    transparent 100%
-  );
+  background: transparent;
   z-index: 1;
   transition: background 0.4s ease;
 }
 
 .problem__card:hover .problem__card-overlay {
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.88) 0%,
-    rgba(0, 0, 0, 0.55) 60%,
-    rgba(0, 0, 0, 0.15) 100%
-  );
+  background: transparent;
 }
 
 .problem__card-content {
