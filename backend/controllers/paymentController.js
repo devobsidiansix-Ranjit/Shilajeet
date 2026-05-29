@@ -1,19 +1,28 @@
-import { StandardCheckoutClient, Env, StandardCheckoutPayRequest } from '@phonepe-pg/pg-sdk-node';
+import crypto from 'crypto';
 import { Order } from '../models/Order.js';
 import { Product } from '../models/Product.js';
 
-// PhonePe Credentials from environment or defaults
-const clientId = process.env.PHONEPE_CLIENT_ID || "M22SGYECP7TW5_2605211959";
-const clientSecret = process.env.PHONEPE_CLIENT_SECRET || "NDNlNGIyNmMtOTExMy00NWQ4LThhMDEtZDg4MzU5YWMzN2U3";
-const clientVersion = 1;
-const env = process.env.PHONEPE_ENV === 'PRODUCTION' ? Env.PRODUCTION : Env.SANDBOX;
+// Environment Configuration
+const env = process.env.PHONEPE_ENV || 'SANDBOX';
+let merchantId = process.env.PHONEPE_CLIENT_ID || "M22SGYECP7TW5_2605211959";
+const fullSecret = process.env.PHONEPE_CLIENT_SECRET || "NDNlNGIyNmMtOTExMy00NWQ4LThhMDEtZDg4MzU5YWMzN2U3";
+let saltKey = fullSecret;
+let saltIndex = 1;
 
-let client;
-try {
-  client = StandardCheckoutClient.getInstance(clientId, clientSecret, clientVersion, env);
-  console.log(`PhonePe SDK client initialized successfully in ${env} mode`);
-} catch (sdkError) {
-  console.error("Error initializing PhonePe SDK client:", sdkError);
+if (fullSecret.includes('###')) {
+  const parts = fullSecret.split('###');
+  saltKey = parts[0];
+  saltIndex = parseInt(parts[1]) || 1;
+}
+
+// Fallback to standard PhonePe Sandbox V1 credentials in Sandbox mode
+if (env === 'SANDBOX') {
+  merchantId = "PGTESTPAYUAT86";
+  saltKey = "96434309-7796-489d-8924-ab56988a6076";
+  saltIndex = 1;
+  console.log("PhonePe running in SANDBOX mode. Using standard PGTESTPAYUAT86 V1 UAT credentials.");
+} else {
+  console.log(`PhonePe running in PRODUCTION mode. Merchant ID: ${merchantId}`);
 }
 
 export const initiatePayment = async (req, res) => {
@@ -22,9 +31,9 @@ export const initiatePayment = async (req, res) => {
     
     const txnId = "TXN" + Date.now();
     const amountInPaise = Math.round(order.price * 100);
-
     const redirectUrl = `${redirectOrigin}?txnId=${txnId}&status=check`;
 
+    // Save initial order in MongoDB
     try {
       const newOrder = new Order({
         user: order.userId || null,
@@ -48,35 +57,56 @@ export const initiatePayment = async (req, res) => {
       console.error("Error creating initial pending order in DB:", saveErr);
     }
 
-    if (!client) {
-      console.log("No PhonePe client initialized. Simulating success redirect URL...");
-      return res.json({
-        success: true,
-        transactionId: txnId,
-        redirectUrl: `${redirectOrigin}?txnId=${txnId}&status=check`
-      });
-    }
+    const payPayload = {
+      merchantId: merchantId,
+      merchantTransactionId: txnId,
+      merchantUserId: "MUID" + Date.now(),
+      amount: amountInPaise,
+      redirectUrl: redirectUrl,
+      redirectMode: "REDIRECT",
+      callbackUrl: redirectUrl,
+      mobileNumber: order.phone1 || "9999999999",
+      paymentInstrument: {
+        type: "PAY_PAGE"
+      }
+    };
 
-    const request = StandardCheckoutPayRequest.builder()
-      .merchantOrderId(txnId)
-      .amount(amountInPaise)
-      .redirectUrl(redirectUrl)
-      .build();
+    const base64Payload = Buffer.from(JSON.stringify(payPayload)).toString('base64');
+    const stringToHash = base64Payload + "/pg/v1/pay" + saltKey;
+    const sha256 = crypto.createHash('sha256').update(stringToHash).digest('hex');
+    const checksum = sha256 + "###" + saltIndex;
 
-    console.log(`Initiating PhonePe payment for order ${txnId}, amount: ₹${order.price}`);
+    const hostUrl = env === 'SANDBOX' 
+      ? 'https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay'
+      : 'https://api.phonepe.com/apis/hermes/pg/v1/pay';
 
-    const response = await client.pay(request);
+    console.log(`Calling PhonePe V1 Pay API at ${hostUrl} for order ${txnId}, amount: ₹${order.price}`);
 
-    if (response && response.redirectUrl) {
+    const response = await fetch(hostUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-VERIFY': checksum
+      },
+      body: JSON.stringify({
+        request: base64Payload
+      })
+    });
+
+    const data = await response.json();
+    console.log("PhonePe API raw response:", JSON.stringify(data));
+
+    if (data.success && data.data && data.data.instrumentResponse && data.data.instrumentResponse.redirectInfo) {
+      const redirectUrlPhonePe = data.data.instrumentResponse.redirectInfo.url;
       res.json({
         success: true,
         transactionId: txnId,
-        redirectUrl: response.redirectUrl
+        redirectUrl: redirectUrlPhonePe
       });
     } else {
       res.status(400).json({
         success: false,
-        error: "Failed to obtain redirect URL from PhonePe SDK"
+        error: data.message || "Failed to obtain redirect URL from PhonePe API"
       });
     }
   } catch (error) {
@@ -93,18 +123,31 @@ export const verifyPayment = async (req, res) => {
     const { transactionId, order } = req.body;
     console.log(`Verifying payment for Transaction: ${transactionId}`);
 
-    let isCompleted = false;
+    const stringToHash = `/pg/v1/status/${merchantId}/${transactionId}` + saltKey;
+    const sha256 = crypto.createHash('sha256').update(stringToHash).digest('hex');
+    const checksum = sha256 + "###" + saltIndex;
 
-    if (!client) {
-      console.log("Simulating PhonePe verification: Success");
-      isCompleted = true;
-    } else {
-      const response = await client.getOrderStatus(transactionId);
-      const state = response.state; 
-      console.log(`PhonePe order status response state: ${state}`);
-      if (state === 'COMPLETED') {
-        isCompleted = true;
+    const hostUrl = env === 'SANDBOX'
+      ? `https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status/${merchantId}/${transactionId}`
+      : `https://api.phonepe.com/apis/hermes/pg/v1/status/${merchantId}/${transactionId}`;
+
+    console.log(`Calling PhonePe V1 Status API at ${hostUrl}`);
+
+    const response = await fetch(hostUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-VERIFY': checksum,
+        'X-MERCHANT-ID': merchantId
       }
+    });
+
+    const data = await response.json();
+    console.log("PhonePe verification response:", JSON.stringify(data));
+
+    let isCompleted = false;
+    if (data.success && data.data && data.data.state === 'COMPLETED') {
+      isCompleted = true;
     }
 
     if (isCompleted) {
