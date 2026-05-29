@@ -39,6 +39,11 @@ async function seedDatabase() {
 
     // 2. Seed default Products if not present
     const productCount = await Product.countDocuments();
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
     if (productCount === 0) {
       const defaultProducts = [
         {
@@ -57,7 +62,14 @@ async function seedDatabase() {
           featured: false,
           dailyLimit: 50,
           receivedQty: 100,
-          soldQty: 0
+          soldQty: 0,
+          monthlyInventory: monthNames.map((name, idx) => ({
+            monthIndex: idx,
+            monthName: name,
+            available: 100,
+            bookings: 0,
+            price: 999
+          }))
         },
         {
           name: 'Best Value Pack',
@@ -76,16 +88,45 @@ async function seedDatabase() {
           featured: true,
           dailyLimit: 50,
           receivedQty: 100,
-          soldQty: 0
+          soldQty: 0,
+          monthlyInventory: monthNames.map((name, idx) => ({
+            monthIndex: idx,
+            monthName: name,
+            available: 100,
+            bookings: 0,
+            price: 1999
+          }))
         }
       ];
       await Product.insertMany(defaultProducts);
-      console.log('🌱 Default Products seeded successfully');
+      console.log('🌱 Default Products seeded successfully with 12-month calendar');
     } else {
-      // Ensure existing products have inventory properties
-      await Product.updateMany({ dailyLimit: { $exists: false } }, { $set: { dailyLimit: 50 } });
-      await Product.updateMany({ receivedQty: { $exists: false } }, { $set: { receivedQty: 100 } });
-      await Product.updateMany({ soldQty: { $exists: false } }, { $set: { soldQty: 0 } });
+      // Ensure existing products have inventory properties and a 12-month calendar
+      const existingProducts = await Product.find();
+      for (const p of existingProducts) {
+        let needsUpdate = false;
+        let updateObj = {};
+        
+        if (p.dailyLimit === undefined) { updateObj.dailyLimit = 50; needsUpdate = true; }
+        if (p.receivedQty === undefined) { updateObj.receivedQty = 100; needsUpdate = true; }
+        if (p.soldQty === undefined) { updateObj.soldQty = 0; needsUpdate = true; }
+        
+        if (!p.monthlyInventory || p.monthlyInventory.length !== 12) {
+          const defaultPrice = p.price || (p.name.includes('Starter') ? 999 : 1999);
+          updateObj.monthlyInventory = monthNames.map((name, idx) => ({
+            monthIndex: idx,
+            monthName: name,
+            available: 100,
+            bookings: 0,
+            price: defaultPrice
+          }));
+          needsUpdate = true;
+        }
+        
+        if (needsUpdate) {
+          await Product.findByIdAndUpdate(p._id, { $set: updateObj });
+        }
+      }
       console.log('🌱 Existing products verified and updated with inventory fields');
     }
   } catch (error) {

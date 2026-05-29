@@ -6,7 +6,8 @@ import {
   Moon, Coffee, Activity, Brain, Flame, ShieldCheck, Heart, AlertCircle,
   Zap, Smile, ArrowRight, Check, Phone, Star, Truck, Lock, RefreshCw,
   ShoppingBag, Sparkles, Award, Users, Play, Clock, ChevronLeft, ChevronRight,
-  User, LogOut, ShieldAlert, DollarSign, Package, TrendingUp, BarChart2, Edit, Menu, Settings
+  User, LogOut, ShieldAlert, DollarSign, Package, TrendingUp, BarChart2, Edit, Menu, Settings,
+  Mail
 } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -25,14 +26,14 @@ const SIMULATE_PAYMENT = false;
 
 /* ─── PAIN CARDS DATA (3x3 Grid) ──────────── */
 const PAINS = [
-  { icon: <Moon size={28} color="#b87333" />, text: 'Wake up exhausted, no matter how long you slept', image: '/images/exhausted_sleep.png' },
-  { icon: <Coffee size={28} color="#b87333" />, text: 'Energy crashes after one hour of work', image: '/images/energy_crash.png' },
-  { icon: <Activity size={28} color="#b87333" />, text: 'Gym performance has plateaued for months', image: '/images/gym_plateau.png' },
-  { icon: <Brain size={28} color="#b87333" />, text: 'Brain fog sets in by mid-afternoon', image: '/images/brain_fog.png' },
-  { icon: <Flame size={28} color="#b87333" />, text: 'Sleep is broken, shallow and not refreshing', image: '/images/broken_sleep.png' },
-  { icon: <ShieldCheck size={28} color="#b87333" />, text: 'Falling sick repeatedly: weak immunity', image: '/images/weak_immunity.png' },
-  { icon: <Heart size={28} color="#b87333" />, text: 'Joints ache after basic activity or workouts', image: '/images/joint_pain.png' },
-  { icon: <AlertCircle size={28} color="#b87333" />, text: "Supplements you've tried didn't deliver", image: '/images/useless_supplements.png' },
+  { icon: <Moon size={28} color="#b87333" />, text: 'Wake up exhausted, no matter how long you slept', image: '/images/Wake_up.png' },
+  { icon: <Coffee size={28} color="#b87333" />, text: 'Energy crashes after one hour of work', image: '/images/Energy_Crash (2).png' },
+  { icon: <Activity size={28} color="#b87333" />, text: 'Gym performance has plateaued for months', image: '/images/Gym_perf.png' },
+  { icon: <Brain size={28} color="#b87333" />, text: 'Brain fog sets in by mid-afternoon', image: '/images/Brain_fog (2).png' },
+  { icon: <Flame size={28} color="#b87333" />, text: 'Sleep is broken, shallow and not refreshing', image: '/images/Sleep_is_broken.png' },
+  { icon: <ShieldCheck size={28} color="#b87333" />, text: 'Falling sick repeatedly: weak immunity', image: '/images/FallingSick.png' },
+  { icon: <Heart size={28} color="#b87333" />, text: 'Joints ache after basic activity or workouts', image: '/images/Joint_ache.png' },
+  { icon: <AlertCircle size={28} color="#b87333" />, text: "Supplements you've tried didn't deliver", image: '/images/Supplement.png' },
   { icon: <Clock size={28} color="#b87333" />, text: 'Feel like your body is aging faster than it should', image: '/images/aging_faster.png' },
 ];
 
@@ -40,12 +41,12 @@ const PAINS = [
 const BENEFITS = [
   { icon: <Zap size={40} color="#b87333" />,        title: 'All-Day Energy',       desc: 'No crash. No caffeine. Real cellular energy from minerals your body actually absorbs.', image: '/images/benefits/energy.png' },
   { icon: <Brain size={40} color="#b87333" />,       title: 'Mental Clarity',       desc: 'Fulvic acid helps nutrients reach your brain. Clearer thinking, faster recall, better focus.', image: '/images/benefits/clarity.png' },
-  { icon: <ShieldCheck size={40} color="#b87333" />, title: 'Stronger Immunity',    desc: '85+ trace minerals rebuild your immune system from the ground up.', image: '/images/benefits/immunity.png' },
+  { icon: <ShieldCheck size={40} color="#b87333" />, title: 'Stronger Immunity',    desc: '85+ trace minerals rebuild your immune system from the ground up.', image: '/images/benefits/immunity_male.png', hoverImage: '/images/benefits/immunity_female.png' },
   { icon: <Activity size={40} color="#b87333" />,    title: 'Faster Recovery',      desc: 'Athletes use it to recover between sessions. Wake up ready to train again.', image: '/images/benefits/recovery.png' },
   { icon: <Moon size={40} color="#b87333" />,        title: 'Deep Sleep',           desc: 'Minerals regulate your sleep cycle. You\'ll notice the difference within 1 week.', image: '/images/benefits/sleep.png' },
-  { icon: <Flame size={40} color="#b87333" />,       title: 'Hormonal Balance',     desc: 'Works for both men and women. Naturally supports the hormones that affect energy and mood.', image: '/images/benefits/hormones.png' },
-  { icon: <Smile size={40} color="#b87333" />,       title: 'Gut Health',           desc: 'Ancient digestive support. Reduces bloating, improves nutrient absorption.', image: '/images/benefits/gut.png' },
-  { icon: <Heart size={40} color="#b87333" />,       title: 'Joint & Bone Strength',desc: 'Calcium and magnesium in bioavailable form. Your joints thank you within 2–3 weeks.', image: '/images/benefits/strength.png' },
+  { icon: <Flame size={40} color="#b87333" />,       title: 'Hormonal Balance',     desc: 'Works for both men and women. Naturally supports the hormones that affect energy and mood.', image: '/images/benefits/hormones_male.png', hoverImage: '/images/benefits/hormones_female.png' },
+  { icon: <Smile size={40} color="#b87333" />,       title: 'Gut Health',           desc: 'Ancient digestive support. Reduces bloating, improves nutrient absorption.', image: '/images/benefits/gut_male.png', hoverImage: '/images/benefits/gut_female.png' },
+  { icon: <Heart size={40} color="#b87333" />,       title: 'Joint & Bone Strength',desc: 'Calcium and magnesium in bioavailable form. Your joints thank you within 2–3 weeks.', image: '/images/benefits/strength_male.png', hoverImage: '/images/benefits/strength_female.png' },
 ];
 
 
@@ -201,6 +202,8 @@ const FAQ_ITEMS = [
 /* ═══════════════════════════════════════════ */
 export default function App() {
   const [scrolledPast, setScrolledPast] = useState(false);
+  const [hoveredBenefit, setHoveredBenefit] = useState(null);
+  const [showFullHeroDesc, setShowFullHeroDesc] = useState(false);
   const heroRef   = useRef(null);
   const videoRef  = useRef(null);
 
@@ -214,7 +217,8 @@ export default function App() {
   const [heroSelectedId, setHeroSelectedId] = useState('default_starter');
   const [heroQty, setHeroQty] = useState(1);
   const [heroActiveImgIndex, setHeroActiveImgIndex] = useState(0);
-  const heroImages = ['/images/product/product_front.png', '/images/product/product_back.png', '/images/product/product_label.png', '/images/product/product_lifestyle.jpg'];
+  const [activePricingId, setActivePricingId] = useState('default_starter');
+  const heroImages = ['/images/product/product_front.png','/images/product/shilajit_jar_mockup.png' , '/images/product/we_provide_vs_others.png', '/images/why_choose_pahadi.png'];
 
 
   const [formFields, setFormFields] = useState({
@@ -1106,17 +1110,37 @@ export default function App() {
         <>
           {/* 01 · HERO SECTION */}
           <section ref={heroRef} className="hero" style={{ alignItems: 'flex-start' }}>
-            <div className="hero__left">
-              <div className="hero-item hero__tag">
+            <div className="hero__left" style={{ paddingTop: '16px' }}>
+              <div className="hero-item hero__tag" style={{ fontSize: '13px', padding: '8px 16px' }}>
                 Direct from Satpura Range Source (Since 2024)
               </div>
-              <h1 className="hero-item hero__headline">
+              <h1 className="hero-item hero__headline" style={{ fontSize: 'clamp(28px, 3.4vw, 42px)', lineHeight: 1.15, marginBottom: '8px' }}>
                 Pahadi Shilajit.<br />
                 <em>As nature formed it.</em><br />
                 Not processed into tablets.
               </h1>
-              <p className="hero-item hero__sub">
-                Pure Satpura Range mineral resin. 85+ minerals. Zero fillers. Zero processing. The same form healers have used for 5,000 years, now available direct from source.
+              <p className="hero-item hero__sub" style={{ marginBottom: '12px', fontSize: '16px', lineHeight: 1.45 }}>
+                {showFullHeroDesc ? (
+                  <>
+                    Pure Satpura Range mineral resin. 85+ minerals. Zero fillers. Zero processing. The same form healers have used for 5,000 years, now available direct from source.
+                    <span 
+                      onClick={() => setShowFullHeroDesc(false)} 
+                      style={{ color: 'var(--gold)', cursor: 'pointer', fontWeight: 700, marginLeft: '6px', textDecoration: 'underline' }}
+                    >
+                      Read Less
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    Pure Satpura Range mineral resin. 85+ minerals. Zero fillers. Zero processing.
+                    <span 
+                      onClick={() => setShowFullHeroDesc(true)} 
+                      style={{ color: 'var(--gold)', cursor: 'pointer', fontWeight: 700, marginLeft: '6px', textDecoration: 'underline' }}
+                    >
+                      Read More...
+                    </span>
+                  </>
+                )}
               </p>
 
               {/* Dynamic Price Box (Pic 1 Style) */}
@@ -1124,190 +1148,210 @@ export default function App() {
                 const currentHeroProduct = products.find(p => p._id === heroSelectedId) || products[0];
                 const heroDiscountPercent = currentHeroProduct?.oldPrice ? Math.round(((currentHeroProduct.oldPrice - currentHeroProduct.price) / currentHeroProduct.oldPrice) * 100) : 33;
                 return (
-                  <>
-                    <div className="hero-item" style={{
-                      background: '#EEF2EB',
-                      border: '1px solid rgba(13,36,23,0.08)',
-                      borderRadius: '16px',
-                      padding: '20px 24px',
-                      marginTop: '20px',
-                      maxWidth: '480px',
-                      boxShadow: '0 4px 12px rgba(13,36,23,0.02)'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '20px', textDecoration: 'line-through', color: '#8C9C8F', fontWeight: 500 }}>₹{currentHeroProduct?.oldPrice}</span>
-                        <span style={{ fontSize: '38px', fontWeight: 800, color: '#0D2417', fontFamily: 'Cormorant Garamond, serif' }}>₹{currentHeroProduct?.price}</span>
-                        <span style={{ fontSize: '20px', fontWeight: 700, color: '#B87333' }}>({heroDiscountPercent}% OFF)</span>
-                      </div>
-                      <div style={{ fontSize: '12px', color: '#8C9C8F', marginTop: '6px', fontWeight: 500 }}>MRP (incl. of all taxes)</div>
-                    </div>
+                  <div style={{
+                    position: 'relative',
+                    background: 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: 'blur(16px)',
+                    border: '1.5px solid rgba(184, 115, 51, 0.22)',
+                    borderRadius: '24px',
+                    padding: '32px 28px',
+                    marginTop: '20px',
+                    maxWidth: '1060px',
+                    minHeight: '350px',
+                    boxShadow: '0 20px 48px rgba(13,36,23,0.08)',
+                    overflow: 'hidden',
+                    zIndex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center'
+                  }}>
+                    <div style={{ display: 'flex', gap: '20px', alignItems: 'stretch', flex: 1 }}>
+                      {/* Left Column: Price Info Box + Radio options */}
+                      <div style={{ flex: 1.1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '14px' }}>
+                        {/* Price Info Box */}
+                        <div style={{
+                          background: 'rgba(238, 242, 235, 0.85)',
+                          border: '1px solid rgba(13,36,23,0.08)',
+                          borderRadius: '12px',
+                          padding: '16px 18px',
+                          boxShadow: '0 4px 12px rgba(13,36,23,0.02)'
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '16px', textDecoration: 'line-through', color: '#8C9C8F', fontWeight: 500 }}>₹{currentHeroProduct?.oldPrice}</span>
+                            <span style={{ fontSize: '32px', fontWeight: 800, color: '#0D2417', fontFamily: 'Cormorant Garamond, serif' }}>₹{currentHeroProduct?.price}</span>
+                            <span style={{ fontSize: '16px', fontWeight: 700, color: '#B87333' }}>({heroDiscountPercent}% OFF)</span>
+                          </div>
+                          <div style={{ fontSize: '11px', color: '#8C9C8F', marginTop: '4px', fontWeight: 500 }}>MRP (incl. of all taxes)</div>
+                        </div>
 
-                    {/* Radio buttons for 10g and 25g selection */}
-                    <div className="hero-item" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '20px', maxWidth: '480px' }}>
-                      {products.slice(0, 2).map((p) => {
-                        const isSelected = p._id === heroSelectedId;
-                        const offPercent = p.oldPrice ? Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100) : 33;
-                        return (
-                          <label key={p._id} style={{
+                        {/* Radio buttons for 10g and 25g selection */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                          {products.slice(0, 2).map((p) => {
+                            const isSelected = p._id === heroSelectedId;
+                            const offPercent = p.oldPrice ? Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100) : 33;
+                            return (
+                              <label key={p._id} style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                background: isSelected ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.4)',
+                                border: isSelected ? '2px solid #B87333' : '1px solid var(--border)',
+                                borderRadius: '12px',
+                                padding: '12px 14px',
+                                cursor: 'pointer',
+                                boxShadow: isSelected ? '0 6px 18px rgba(184,115,51,0.08)' : 'none',
+                                transition: 'all 0.2s ease'
+                              }}>
+                                <input
+                                  type="radio"
+                                  name="hero-product-select"
+                                  checked={isSelected}
+                                  onChange={() => {
+                                    setHeroSelectedId(p._id);
+                                    setHeroActiveImgIndex(p._id === 'default_best' ? 1 : 0);
+                                  }}
+                                  style={{
+                                    accentColor: '#B87333',
+                                    width: '16px',
+                                    height: '16px',
+                                    cursor: 'pointer'
+                                  }}
+                                />
+                                <div style={{ flex: 1 }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--ink)' }}>{p.grams.includes('10') ? '10g Starter Pack' : '25g Best Value Pack'}</span>
+                                    <span style={{ fontSize: '13.5px', fontWeight: 800, color: '#B87333' }}>₹{p.price}</span>
+                                  </div>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '3px', fontSize: '11px', color: 'var(--muted)' }}>
+                                    <span>{p.supply}</span>
+                                    <span style={{ fontWeight: 600, color: '#4ade80' }}>@{offPercent}% OFF</span>
+                                  </div>
+                                </div>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Right Column: Quantity selector + stacked buttons */}
+                      <div style={{ flex: 0.9, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '14px' }}>
+                        {/* Quantity Selector */}
+                        <div>
+                          <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--muted)', letterSpacing: '0.08em', marginBottom: '6px' }}>Quantity</div>
+                          <div style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '16px',
-                            background: 'var(--white)',
-                            border: isSelected ? '1.5px solid #B87333' : '1px solid var(--border)',
-                            borderRadius: '12px',
-                            padding: '16px',
-                            cursor: 'pointer',
-                            boxShadow: isSelected ? '0 4px 12px rgba(184,115,51,0.08)' : '0 2px 4px rgba(0,0,0,0.01)',
-                            transition: 'all 0.2s ease'
+                            background: 'rgba(255,255,255,0.95)',
+                            border: '1px solid var(--border)',
+                            borderRadius: '10px',
+                            width: '100%',
+                            height: '42px',
+                            overflow: 'hidden',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.01)'
                           }}>
-                            <input
-                              type="radio"
-                              name="hero-product-select"
-                              checked={isSelected}
-                              onChange={() => {
-                                setHeroSelectedId(p._id);
-                                setHeroActiveImgIndex(p._id === 'default_best' ? 1 : 0);
-                              }}
+                            <button
+                              onClick={() => setHeroQty(prev => Math.max(1, prev - 1))}
                               style={{
-                                accentColor: '#B87333',
-                                width: '18px',
-                                height: '18px',
-                                cursor: 'pointer'
+                                width: '40px',
+                                height: '100%',
+                                background: 'transparent',
+                                border: 'none',
+                                fontSize: '16px',
+                                fontWeight: 600,
+                                color: 'var(--ink)',
+                                cursor: 'pointer',
+                                transition: 'background 0.2s'
                               }}
-                            />
-                            <div style={{ flex: 1 }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--ink)' }}>{p.grams.includes('10') ? '10g Starter Pack' : '25g Best Value Pack'}</span>
-                                <span style={{ fontSize: '15px', fontWeight: 800, color: '#B87333' }}>₹{p.price}</span>
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px', fontSize: '12px', color: 'var(--muted)' }}>
-                                <span>{p.supply}</span>
-                                <span style={{ fontWeight: 600, color: '#4ade80' }}>@{offPercent}% OFF</span>
-                              </div>
-                              <div style={{ fontSize: '12px', color: '#B87333', fontWeight: 600, marginTop: '6px', textAlign: 'left' }}>
-                                ⚡ Only {Math.max(0, (p.receivedQty !== undefined ? p.receivedQty : 100) - (p.soldQty !== undefined ? p.soldQty : 0))} packs left today!
-                              </div>
-                            </div>
-                          </label>
-                        );
-                      })}
-                    </div>
+                              onMouseEnter={e => e.target.style.background = '#f9fafb'}
+                              onMouseLeave={e => e.target.style.background = 'transparent'}
+                            >-</button>
+                            <span style={{
+                              flex: 1,
+                              textAlign: 'center',
+                              fontSize: '14px',
+                              fontWeight: 700,
+                              color: 'var(--ink)'
+                            }}>{heroQty}</span>
+                            <button
+                              onClick={() => setHeroQty(prev => prev + 1)}
+                              style={{
+                                width: '40px',
+                                height: '100%',
+                                background: 'transparent',
+                                border: 'none',
+                                fontSize: '16px',
+                                fontWeight: 600,
+                                color: 'var(--ink)',
+                                cursor: 'pointer',
+                                transition: 'background 0.2s'
+                              }}
+                              onMouseEnter={e => e.target.style.background = '#f9fafb'}
+                              onMouseLeave={e => e.target.style.background = 'transparent'}
+                            >+</button>
+                          </div>
+                        </div>
 
-                    {/* Quantity selector */}
-                    <div className="hero-item" style={{ marginTop: '24px', maxWidth: '480px' }}>
-                      <div style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--muted)', letterSpacing: '0.08em', marginBottom: '8px' }}>Quantity</div>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        background: 'var(--white)',
-                        border: '1px solid var(--border)',
-                        borderRadius: '8px',
-                        width: '130px',
-                        height: '42px',
-                        overflow: 'hidden',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.01)'
-                      }}>
-                        <button
-                          onClick={() => setHeroQty(prev => Math.max(1, prev - 1))}
-                          style={{
-                            width: '40px',
-                            height: '100%',
-                            background: 'transparent',
-                            border: 'none',
-                            fontSize: '18px',
-                            fontWeight: 600,
-                            color: 'var(--ink)',
-                            cursor: 'pointer',
-                            transition: 'background 0.2s'
-                          }}
-                          onMouseEnter={e => e.target.style.background = '#f9fafb'}
-                          onMouseLeave={e => e.target.style.background = 'transparent'}
-                        >-</button>
-                        <span style={{
-                          flex: 1,
-                          textAlign: 'center',
-                          fontSize: '15px',
-                          fontWeight: 700,
-                          color: 'var(--ink)'
-                        }}>{heroQty}</span>
-                        <button
-                          onClick={() => setHeroQty(prev => prev + 1)}
-                          style={{
-                            width: '40px',
-                            height: '100%',
-                            background: 'transparent',
-                            border: 'none',
-                            fontSize: '18px',
-                            fontWeight: 600,
-                            color: 'var(--ink)',
-                            cursor: 'pointer',
-                            transition: 'background 0.2s'
-                          }}
-                          onMouseEnter={e => e.target.style.background = '#f9fafb'}
-                          onMouseLeave={e => e.target.style.background = 'transparent'}
-                        >+</button>
+                        {/* Stacked CTA Buttons */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
+                          <button
+                            onClick={() => addToCart({ ...currentHeroProduct, quantity: heroQty })}
+                            style={{
+                              width: '100%',
+                              height: '44px',
+                              borderRadius: '10px',
+                              background: 'rgba(255,255,255,0.95)',
+                              border: '2px solid #B87333',
+                              color: '#B87333',
+                              fontSize: '13px',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '8px',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={e => { e.target.style.background = 'rgba(184,115,51,0.08)' }}
+                            onMouseLeave={e => { e.target.style.background = 'rgba(255,255,255,0.95)' }}
+                          >
+                            <ShoppingBag size={15} /> Add to Cart
+                          </button>
+                          <button
+                            onClick={() => openCheckout({
+                              _id: currentHeroProduct._id,
+                              name: `${currentHeroProduct.name} (x${heroQty})`,
+                              price: currentHeroProduct.price * heroQty,
+                              grams: currentHeroProduct.grams,
+                              supply: currentHeroProduct.supply,
+                              imageUrl: currentHeroProduct.imageUrl
+                            })}
+                            style={{
+                              width: '100%',
+                              height: '44px',
+                              borderRadius: '10px',
+                              background: '#B87333',
+                              border: 'none',
+                              color: 'white',
+                              fontSize: '13px',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '8px',
+                              transition: 'background 0.2s'
+                            }}
+                            onMouseEnter={e => { e.target.style.background = '#995a22' }}
+                            onMouseLeave={e => { e.target.style.background = '#B87333' }}
+                          >
+                            Buy Now
+                          </button>
+                        </div>
                       </div>
                     </div>
-
-            {/* Add to Cart and Buy Now parallel buttons */}
-            <div className="hero-item" style={{ display: 'flex', gap: '16px', marginTop: '24px', maxWidth: '480px' }}>
-              <button
-                onClick={() => addToCart({ ...currentHeroProduct, quantity: heroQty })}
-                style={{
-                  flex: 1,
-                  height: '48px',
-                  borderRadius: '8px',
-                  background: 'transparent',
-                  border: '1.5px solid #B87333',
-                  color: '#B87333',
-                  fontSize: '14px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={e => { e.target.style.background = 'rgba(184,115,51,0.05)' }}
-                onMouseLeave={e => { e.target.style.background = 'transparent' }}
-              >
-                <ShoppingBag size={16} /> Add to Cart
-              </button>
-              <button
-                onClick={() => openCheckout({
-                  _id: currentHeroProduct._id,
-                  name: `${currentHeroProduct.name} (x${heroQty})`,
-                  price: currentHeroProduct.price * heroQty,
-                  grams: currentHeroProduct.grams,
-                  supply: currentHeroProduct.supply,
-                  imageUrl: currentHeroProduct.imageUrl
-                })}
-                style={{
-                  flex: 1,
-                  height: '48px',
-                  borderRadius: '8px',
-                  background: '#B87333',
-                  border: 'none',
-                  color: 'white',
-                  fontSize: '14px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  transition: 'background 0.2s'
-                }}
-                onMouseEnter={e => { e.target.style.background = '#995a22' }}
-                onMouseLeave={e => { e.target.style.background = '#B87333' }}
-              >
-                Buy Now
-              </button>
-            </div>
-          </>
-        );
-      })()}
+                  </div>
+                );
+              })()}
     </div>
 
           {/* Right side product image carousel */}
@@ -1316,7 +1360,7 @@ export default function App() {
             flexDirection: 'column', 
             justifyContent: 'flex-start', 
             alignItems: 'center', 
-            padding: '80px 16px 32px', 
+            padding: '16px 16px 32px', 
             gap: '16px',
             height: 'auto',
             minHeight: '100%',
@@ -1414,102 +1458,99 @@ export default function App() {
                 );
               })}
             </div>
+          </div>
+          </section>
 
-            {/* 4 Square Trust Badges (Image 4 Style Redesign) */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '16px',
-              width: '100%',
-              maxWidth: '640px',
-              marginTop: '16px'
-            }}>
-              {/* Box 1: COD Available */}
-              <div style={{
-                background: 'var(--white)',
-                border: '1.5px solid rgba(13,36,23,0.06)',
-                borderRadius: '16px',
-                padding: '20px 16px',
-                textAlign: 'center',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.015)',
-                transition: 'all 0.2s ease'
-              }} className="hero-trust-box">
-                <div style={{ color: 'var(--earth)', marginBottom: '8px' }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><path d="M6 14h.01M10 14h.01M14 14h.01M18 14h.01"/></svg>
+          {/* Full-width single-row trust badges to remove gap at left side (Image 1 Row Style Redesign) */}
+          <div style={{
+            background: 'var(--cream)',
+            padding: '32px 24px 48px 24px',
+            borderBottom: '1px solid rgba(13,36,23,0.06)'
+          }}>
+            <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
+              <div className="hero-trust-row-grid">
+                {/* Box 1: COD Available */}
+                <div style={{
+                  background: 'var(--white)',
+                  border: '1.5px solid rgba(13,36,23,0.06)',
+                  borderRadius: '16px',
+                  padding: '24px 20px',
+                  textAlign: 'center',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.015)'
+                }} className="hero-trust-box">
+                  <div style={{ color: 'var(--earth)', marginBottom: '8px' }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><path d="M6 14h.01M10 14h.01M14 14h.01M18 14h.01"/></svg>
+                  </div>
+                  <h4 style={{ fontSize: '12px', fontWeight: 700, color: 'var(--earth)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 6px 0' }}>COD Available</h4>
+                  <div style={{ width: '24px', height: '1px', background: 'rgba(13,36,23,0.12)', margin: '0 auto 8px' }} />
+                  <p style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: 1.4, margin: 0 }}>Pay in cash when your package arrives safely.</p>
                 </div>
-                <h4 style={{ fontSize: '12px', fontWeight: 700, color: 'var(--earth)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 6px 0' }}>COD Available</h4>
-                <div style={{ width: '24px', height: '1px', background: 'rgba(13,36,23,0.12)', margin: '0 auto 8px' }} />
-                <p style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: 1.4, margin: 0 }}>Pay in cash when your package arrives safely.</p>
-              </div>
 
-              {/* Box 2: Ships in 24 hrs */}
-              <div style={{
-                background: 'var(--white)',
-                border: '1.5px solid rgba(13,36,23,0.06)',
-                borderRadius: '16px',
-                padding: '20px 16px',
-                textAlign: 'center',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.015)',
-                transition: 'all 0.2s ease'
-              }} className="hero-trust-box">
-                <div style={{ color: 'var(--earth)', marginBottom: '8px' }}>
-                  <Truck size={24} strokeWidth={1.5} />
+                {/* Box 2: Ships in 24 hrs */}
+                <div style={{
+                  background: 'var(--white)',
+                  border: '1.5px solid rgba(13,36,23,0.06)',
+                  borderRadius: '16px',
+                  padding: '24px 20px',
+                  textAlign: 'center',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.015)'
+                }} className="hero-trust-box">
+                  <div style={{ color: 'var(--earth)', marginBottom: '8px' }}>
+                    <Truck size={24} strokeWidth={1.5} />
+                  </div>
+                  <h4 style={{ fontSize: '12px', fontWeight: 700, color: 'var(--earth)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 6px 0' }}>Ships in 24 hrs</h4>
+                  <div style={{ width: '24px', height: '1px', background: 'rgba(13,36,23,0.12)', margin: '0 auto 8px' }} />
+                  <p style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: 1.4, margin: 0 }}>Dispatched within 24 hours via express delivery.</p>
                 </div>
-                <h4 style={{ fontSize: '12px', fontWeight: 700, color: 'var(--earth)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 6px 0' }}>Ships in 24 hrs</h4>
-                <div style={{ width: '24px', height: '1px', background: 'rgba(13,36,23,0.12)', margin: '0 auto 8px' }} />
-                <p style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: 1.4, margin: 0 }}>Dispatched within 24 hours via express delivery.</p>
-              </div>
 
-              {/* Box 3: 15-day Guarantee */}
-              <div style={{
-                background: 'var(--white)',
-                border: '1.5px solid rgba(13,36,23,0.06)',
-                borderRadius: '16px',
-                padding: '20px 16px',
-                textAlign: 'center',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.015)',
-                transition: 'all 0.2s ease'
-              }} className="hero-trust-box">
-                <div style={{ color: 'var(--earth)', marginBottom: '8px' }}>
-                  <ShieldCheck size={24} strokeWidth={1.5} />
+                {/* Box 3: 15-day Guarantee */}
+                <div style={{
+                  background: 'var(--white)',
+                  border: '1.5px solid rgba(13,36,23,0.06)',
+                  borderRadius: '16px',
+                  padding: '24px 20px',
+                  textAlign: 'center',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.015)'
+                }} className="hero-trust-box">
+                  <div style={{ color: 'var(--earth)', marginBottom: '8px' }}>
+                    <ShieldCheck size={24} strokeWidth={1.5} />
+                  </div>
+                  <h4 style={{ fontSize: '12px', fontWeight: 700, color: 'var(--earth)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 6px 0' }}>15-day Guarantee</h4>
+                  <div style={{ width: '24px', height: '1px', background: 'rgba(13,36,23,0.12)', margin: '0 auto 8px' }} />
+                  <p style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: 1.4, margin: 0 }}>Try it at home. Satisfied or full money-back refund.</p>
                 </div>
-                <h4 style={{ fontSize: '12px', fontWeight: 700, color: 'var(--earth)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 6px 0' }}>15-day Guarantee</h4>
-                <div style={{ width: '24px', height: '1px', background: 'rgba(13,36,23,0.12)', margin: '0 auto 8px' }} />
-                <p style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: 1.4, margin: 0 }}>Try it at home. Satisfied or full money-back refund.</p>
-              </div>
 
-              {/* Box 4: 500+ Customers */}
-              <div style={{
-                background: 'var(--white)',
-                border: '1.5px solid rgba(13,36,23,0.06)',
-                borderRadius: '16px',
-                padding: '20px 16px',
-                textAlign: 'center',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.015)',
-                transition: 'all 0.2s ease'
-              }} className="hero-trust-box">
-                <div style={{ color: 'var(--earth)', marginBottom: '8px' }}>
-                  <Users size={24} strokeWidth={1.5} />
+                {/* Box 4: 500+ Customers */}
+                <div style={{
+                  background: 'var(--white)',
+                  border: '1.5px solid rgba(13,36,23,0.06)',
+                  borderRadius: '16px',
+                  padding: '24px 20px',
+                  textAlign: 'center',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.015)'
+                }} className="hero-trust-box">
+                  <div style={{ color: 'var(--earth)', marginBottom: '8px' }}>
+                    <Users size={24} strokeWidth={1.5} />
+                  </div>
+                  <h4 style={{ fontSize: '12px', fontWeight: 700, color: 'var(--earth)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 6px 0' }}>500+ Customers</h4>
+                  <div style={{ width: '24px', height: '1px', background: 'rgba(13,36,23,0.12)', margin: '0 auto 8px' }} />
+                  <p style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: 1.4, margin: 0 }}>Trusted by hundreds of healthy individuals in India.</p>
                 </div>
-                <h4 style={{ fontSize: '12px', fontWeight: 700, color: 'var(--earth)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 6px 0' }}>500+ Customers</h4>
-                <div style={{ width: '24px', height: '1px', background: 'rgba(13,36,23,0.12)', margin: '0 auto 8px' }} />
-                <p style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: 1.4, margin: 0 }}>Trusted by hundreds of healthy individuals in India.</p>
               </div>
             </div>
           </div>
-          </section>
 
           {/* 02 · TRUST BAR / TICKER */}
           <div className="ticker">
@@ -1527,54 +1568,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* WHY APASYA? (Kapiva-Style Redesign) */}
-          <section className="why-apasya" style={{ background: '#FAF6F0', padding: '80px 0', borderBottom: '1px solid var(--border)' }}>
-            <div className="container">
-              <div style={{ textAlign: 'center', marginBottom: '56px' }}>
-                <p className="label" style={{ letterSpacing: '0.12em', color: '#B87333', marginBottom: '12px' }}>THE APASYA DIFFERENCE</p>
-                <h2 className="h2" style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(36px, 4vw, 52px)', color: '#0D2417', margin: 0 }}>WHY APASYA?</h2>
-                <div style={{ width: '60px', height: '3px', background: '#B87333', margin: '20px auto 0' }} />
-              </div>
-
-              <div className="why-apasya__grid">
-                {/* Pillar 1: Direct from Satpura */}
-                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(27,61,43,0.06)', color: 'var(--earth)' }}>
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 22h20L12 2z"/><path d="M12 2v20"/><path d="M8 12h8"/></svg>
-                  </div>
-                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--earth)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Direct from Satpura</h3>
-                  <p style={{ fontSize: '14px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '240px', margin: 0 }}>Sourced directly from Satpura Range rock formations. No middleman, direct since 2024.</p>
-                </div>
-
-                {/* Pillar 2: Raw Rock Resin */}
-                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(27,61,43,0.06)', color: 'var(--earth)' }}>
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-                  </div>
-                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--earth)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Raw Rock Resin</h3>
-                  <p style={{ fontSize: '14px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '240px', margin: 0 }}>Sun-dried raw mineral resin in its natural, unprocessed form. Zero fillers, zero processing.</p>
-                </div>
-
-                {/* Pillar 3: 85+ Trace Minerals */}
-                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(27,61,43,0.06)', color: 'var(--earth)' }}>
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
-                  </div>
-                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--earth)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>85+ Minerals</h3>
-                  <p style={{ fontSize: '14px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '240px', margin: 0 }}>High concentration of active fulvic acid and trace minerals for maximum cellular absorption.</p>
-                </div>
-
-                {/* Pillar 4: Lab Certified */}
-                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(27,61,43,0.06)', color: 'var(--earth)' }}>
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                  </div>
-                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--earth)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Lab Certified</h3>
-                  <p style={{ fontSize: '14px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '240px', margin: 0 }}>Rigorous laboratory testing for safety. 100% free from heavy metals or artificial chemicals.</p>
-                </div>
-              </div>
-            </div>
-          </section>
 
           {/* 03 · PAIN / PROBLEM SECTION */}
           <section className="problem" id="problem">
@@ -1589,19 +1582,42 @@ export default function App() {
 
               {/* Pain Cards 3x3 Grid */}
               <div className="problem__grid reveal">
-                {PAINS.map((card, index) => (
-                  <div key={index} className="problem__card">
-                    <img src={card.image} alt={card.text} className="problem__card-image" />
-                    <div className="problem__card-overlay" />
-                    <div className="problem__card-content">
-                      <div className="problem__card-icon">{card.icon}</div>
-                      <div className="problem__card-text-wrapper">
-                        <p className="problem__card-text">{card.text}</p>
-                        <div className="problem__card-line" />
+                {PAINS.map((card, index) => {
+                  const isAgingCard = index === 8;
+                  return (
+                    <div 
+                      key={index} 
+                      className={`problem__card ${isAgingCard ? 'problem__card--aging' : ''}`}
+                    >
+                      {isAgingCard ? (
+                        <>
+                          <img 
+                            src="/images/tired_man_head.png" 
+                            alt="Feeling tired and aging" 
+                            className="problem__card-image" 
+                            style={{ objectPosition: 'center 15%' }} 
+                          />
+                          <img 
+                            src="/images/disappointed_man_bottle.png" 
+                            alt="Disappointed with supplements" 
+                            className="problem__card-image problem__card-image--hover" 
+                            style={{ objectPosition: 'center 15%' }} 
+                          />
+                        </>
+                      ) : (
+                        <img src={card.image} alt={card.text} className="problem__card-image" />
+                      )}
+                      <div className="problem__card-overlay" />
+                      <div className="problem__card-content">
+                        <div className="problem__card-icon">{card.icon}</div>
+                        <div className="problem__card-text-wrapper">
+                          <p className="problem__card-text">{card.text}</p>
+                          <div className="problem__card-line" />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Bridge line */}
@@ -1667,34 +1683,178 @@ export default function App() {
                 <p className="body-text">Most brands market only one benefit. Real Shilajit works on all of these at the same time.</p>
               </div>
               <div className="benefits__grid reveal">
-                {BENEFITS.map(({ icon, title, desc, image }) => (
-                  <div key={title} className="benefit" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', background: 'var(--white)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 4px 20px rgba(0,0,0,0.01)', transition: 'all 0.3s ease' }}>
-                    <div style={{ width: '100%', height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '16px', overflow: 'hidden', borderRadius: '12px', background: 'transparent' }}>
-                      <img src={image} alt={title} style={{ height: '100%', objectFit: 'contain' }} />
+                {BENEFITS.map(({ icon, title, desc, image, hoverImage }) => {
+                  const isHovered = hoveredBenefit === title;
+                  const currentImage = (isHovered && hoverImage) ? hoverImage : image;
+                  return (
+                    <div 
+                      key={title} 
+                      className="benefit" 
+                      onMouseEnter={() => setHoveredBenefit(title)}
+                      onMouseLeave={() => setHoveredBenefit(null)}
+                      style={{ 
+                        display: 'flex', 
+                        flexDirection: 'column', 
+                        alignItems: 'center', 
+                        textAlign: 'center', 
+                        background: 'var(--white)', 
+                        padding: '24px', 
+                        borderRadius: '16px', 
+                        border: '1px solid var(--border)', 
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.01)', 
+                        transition: 'all 0.3s ease',
+                        cursor: hoverImage ? 'pointer' : 'default'
+                      }}
+                    >
+                      <div style={{ 
+                        width: '100%', 
+                        height: '200px', 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center', 
+                        marginBottom: '16px', 
+                        overflow: 'hidden', 
+                        borderRadius: '12px', 
+                        background: 'transparent',
+                        position: 'relative'
+                      }}>
+                        <img 
+                          src={currentImage} 
+                          alt={title} 
+                          style={{ 
+                            height: '100%', 
+                            width: '100%',
+                            objectFit: hoverImage ? 'cover' : 'contain', 
+                            transition: 'all 0.5s ease',
+                            transform: isHovered && hoverImage ? 'scale(1.05)' : 'scale(1)'
+                          }} 
+                        />
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', justifyContent: 'center' }}>
+                        {icon}
+                        <div className="benefit__title" style={{ margin: 0, fontSize: '18px', fontWeight: 700 }}>{title}</div>
+                      </div>
+                      <div className="benefit__text" style={{ fontSize: '14px', color: 'var(--muted)', lineHeight: 1.5 }}>{desc}</div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', justifyContent: 'center' }}>
-                      {icon}
-                      <div className="benefit__title" style={{ margin: 0, fontSize: '18px', fontWeight: 700 }}>{title}</div>
+                  );
+                })}
+              </div>
+
+            </div>
+          </section>
+
+          {/* KEY INGREDIENTS SECTION (Below 8 Benefits) */}
+          <section className="key-ingredients" style={{ background: 'var(--cream)', padding: '80px 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
+            <div className="container">
+              <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+                <p className="label" style={{ letterSpacing: '0.12em', color: '#B87333', marginBottom: '12px' }}>VITAL FORMULATION</p>
+                <h2 className="serif" style={{ fontSize: 'clamp(36px, 4vw, 48px)', color: '#0D2417', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 300 }}>
+                  <strong style={{ fontWeight: 800 }}>KEY</strong> INGREDIENTS
+                </h2>
+                <div style={{ width: '60px', height: '3px', background: '#B87333', margin: '20px auto 0' }} />
+              </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: '32px 40px',
+                maxWidth: '960px',
+                margin: '0 auto'
+              }}>
+                {[
+                  {
+                    name: 'Shilajit',
+                    desc: 'Clinically tested Shilajit rich in Fulvic acid (>60%)',
+                    img: '/images/ingredients/shilajit.png'
+                  },
+                  {
+                    name: 'Swarna Bhasma',
+                    desc: 'Contains 24 Karat Gold made with special Ayurvedic Marana Process',
+                    img: '/images/ingredients/swarna_bhasma.png'
+                  },
+                  {
+                    name: 'Gokshura',
+                    desc: 'Potent Ayurvedic herb for men\'s health & wellness',
+                    img: '/images/ingredients/gokshura.png'
+                  },
+                  {
+                    name: 'Black Musli',
+                    desc: 'Potent Ayurvedic herb for men\'s health & wellness',
+                    img: '/images/ingredients/black_musli.png'
+                  },
+                  {
+                    name: 'Nagori Ashwagandha',
+                    desc: '183rd day harvested with withanolide content',
+                    img: '/images/ingredients/ashwagandha.png'
+                  }
+                ].map((ing, i) => (
+                  <div key={ing.name} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '24px',
+                    background: 'var(--white)',
+                    padding: '24px',
+                    borderRadius: '16px',
+                    boxShadow: '0 4px 16px rgba(13,36,23,0.02)',
+                    border: '1px solid var(--border)',
+                    gridColumn: i === 4 ? 'span 2' : 'auto',
+                    maxWidth: i === 4 ? '460px' : 'none',
+                    justifySelf: i === 4 ? 'center' : 'auto',
+                    width: '100%',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.transform = 'translateY(-3px)';
+                    e.currentTarget.style.borderColor = 'var(--gold)';
+                    e.currentTarget.style.boxShadow = '0 10px 24px rgba(13,36,23,0.06)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.borderColor = 'var(--border)';
+                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(13,36,23,0.02)';
+                  }}
+                  >
+                    <div style={{
+                      width: '90px',
+                      height: '90px',
+                      borderRadius: '50%',
+                      overflow: 'hidden',
+                      flexShrink: 0,
+                      border: '2px solid var(--border)',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+                    }}>
+                      <img src={ing.img} alt={ing.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
-                    <div className="benefit__text" style={{ fontSize: '14px', color: 'var(--muted)', lineHeight: 1.5 }}>{desc}</div>
+                    <div style={{ textAlign: 'left' }}>
+                      <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--ink)', marginBottom: '6px' }}>{ing.name}</h3>
+                      <p style={{ fontSize: '14.5px', color: 'var(--muted)', lineHeight: 1.45, fontWeight: 400, margin: 0 }}>{ing.desc}</p>
+                    </div>
                   </div>
                 ))}
               </div>
-
             </div>
           </section>
 
           {/* 06 · HOW TO USE + VIDEO */}
           <section className="howto" id="how-to-use">
             <div className="container">
-              <div className="howto__grid">
-                <div>
+              <div className="howto__grid" style={{ alignItems: 'stretch' }}>
+                <div style={{
+                  background: '#FDF8F4',
+                  padding: '40px',
+                  borderRadius: '24px',
+                  border: '1.5px solid var(--border)',
+                  boxShadow: '0 12px 32px var(--shadow)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center'
+                }}>
                   <div className="reveal">
                     <p className="label">Daily Ritual</p>
                     <h2 className="h2">It's simpler than you think: 30 seconds every morning</h2>
                     <p className="body-text">People hesitate because they don't know how to use Pahadi Shilajit. It's the simplest supplement you'll ever use.</p>
                   </div>
-                  <div className="howto__steps reveal">
+                  <div className="howto__steps reveal" style={{ marginTop: '32px' }}>
                     {[
                       ['Take a piece', 'Pinch a chickpea-sized piece (300–500mg) from the jar.'],
                       ['Drop in liquid', 'Drop it into a glass of warm water, warm milk, or your morning chai.'],
@@ -1702,46 +1862,42 @@ export default function App() {
                       ['Drink empty stomach', 'Drink it 30 minutes before food, first thing in the morning.'],
                       ['See the shift', 'Results begin in 7–10 days. Full benefits in 4–6 weeks.'],
                     ].map(([step, desc], i) => (
-                      <div key={step} className="step">
-                        <div className="step__num">{i + 1}</div>
+                      <div key={step} className="step" style={{ borderColor: 'rgba(184,115,51,0.15)' }}>
+                        <div className="step__num" style={{ background: 'var(--gold)', color: 'white', border: 'none' }}>{i + 1}</div>
                         <div>
-                          <div className="step__title">{step}</div>
-                          <div className="step__text">{desc}</div>
+                          <div className="step__title" style={{ fontWeight: 700, color: 'var(--ink)' }}>{step}</div>
+                          <div className="step__text" style={{ color: 'var(--muted)', fontWeight: 400 }}>{desc}</div>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="reveal">
+                <div className="reveal" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', height: '100%', justifyContent: 'space-between' }}>
                   <div style={{
-                    borderRadius: 16,
+                    borderRadius: 24,
                     overflow: 'hidden',
-                    border: '1px solid var(--border)',
-                    boxShadow: '0 20px 48px var(--shadow)',
-                    background: '#000',
+                    border: '1.5px solid var(--border)',
+                    boxShadow: '0 24px 64px var(--shadow)',
+                    background: '#ffffff',
                     position: 'relative',
-                    aspectRatio: '9/16',
-                    maxHeight: 520,
-                    width: '100%'
+                    width: '100%',
+                    maxWidth: '680px',
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '24px'
                   }}>
-                    <div style={{
-                      position: 'absolute', top: 16, left: 16, zIndex: 5,
-                      background: 'var(--gold)', color: '#fff', borderRadius: 4,
-                      padding: '4px 10px', fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase'
-                    }}>📹 PURITY DEMO</div>
-                    <video
-                      src={products[0]?.videoUrl || "/Home.mp4"}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover' }}
+                    <img 
+                      src="/images/how_to_consume.png" 
+                      alt="How to Consume Pahadi Shilajit" 
+                      style={{ width: '100%', maxHeight: '100%', objectFit: 'contain', display: 'block' }} 
                     />
                   </div>
                   <p style={{
-                    fontSize: 13, color: 'var(--muted)', textAlign: 'center', fontStyle: 'italic', marginTop: 12
-                  }}>Watch the rock dissolve completely in warm water: zero residue, zero sediment.</p>
+                    fontSize: 13, color: 'var(--muted)', textAlign: 'center', fontStyle: 'italic', marginTop: 16, fontWeight: 500, marginBottom: 0
+                  }}>Purity in practice: simple, clean, and highly absorbable. Follow these 4 easy steps daily.</p>
                 </div>
               </div>
             </div>
@@ -1811,7 +1967,7 @@ export default function App() {
           </section>
 
           {/* 08 · REVIEWS / SOCIAL PROOF */}
-          <section className="reviews" id="reviews">
+          <section className="reviews" id="reviews" style={{ paddingBottom: '40px' }}>
             <div className="container">
               <div>
                 <p className="label">Real customers, real results</p>
@@ -1848,52 +2004,109 @@ export default function App() {
             </div>
           </section>
 
-          {/* 09 · LOCAL VENDOR TRUST / SELLER STORY */}
-          <section className="story" id="story">
+          {/* WHY APASYA SHILAJITH */}
+          <section id="why-apasya" className="why-apasya" style={{ background: '#FAF6F0', paddingTop: '40px', paddingBottom: '40px', borderBottom: '1px solid var(--border)' }}>
             <div className="container">
-              <div className="story__grid">
-                <div className="reveal">
-                  <div className="story__photo-zone" style={{ border: 'none', background: 'var(--stone)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
-                    <div style={{
-                      width: 140, height: 140, borderRadius: '50%',
-                      background: 'linear-gradient(135deg, var(--gold), var(--gold2))',
-                      padding: 3, boxShadow: '0 8px 24px var(--shadow)'
-                    }}>
-                      <div style={{
-                        width: '100%', height: '100%', borderRadius: '50%',
-                        background: 'var(--cream)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 64
-                      }}>🧔</div>
-                    </div>
-                    <div>
-                      <h3 className="h3" style={{ marginBottom: 4, color: 'var(--ink)' }}>{SELLER_NAME}</h3>
-                      <p style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 500 }}>Direct Mountain Supplier</p>
-                      <p style={{ fontSize: 13, color: 'var(--muted)' }}>{SELLER_TOWN}</p>
-                    </div>
+              <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                <p className="label" style={{ letterSpacing: '0.12em', color: '#B87333', marginBottom: '12px' }}>THE APASYA DIFFERENCE</p>
+                <h2 className="h2" style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px, 3.5vw, 42px)', color: '#0D2417', margin: 0 }}>WHY APASYA SHILAJITH?</h2>
+                <div style={{ width: '60px', height: '3px', background: '#B87333', margin: '16px auto 0' }} />
+              </div>
+
+              <div className="why-apasya__grid">
+                {/* Pillar 1: Direct from Satpura */}
+                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div style={{ 
+                    marginBottom: '20px', 
+                    width: '90px', 
+                    height: '90px', 
+                    borderRadius: '50%', 
+                    border: '2px solid rgba(184, 115, 51, 0.35)', 
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.06)',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: '#FFFFFF',
+                    transition: 'all 0.3s ease'
+                  }}>
+                    <img src="/images/apasya_satpura.png" alt="Direct from Satpura" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
+                  <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--earth)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Direct from Satpura</h3>
+                  <p style={{ fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.5, maxWidth: '240px', margin: 0 }}>Sourced directly from Satpura Range rock formations. No middleman, direct since 2024.</p>
                 </div>
 
-                <div className="reveal">
-                  <div className="story__opener">“</div>
-                  <div className="story__copy">
-                    <p className="body-text">I am not a corporate brand. I am {SELLER_NAME} from {SELLER_TOWN}.</p>
-                    <p className="body-text">My family has known this source in the Satpuraa Range for many years. I started selling this because I saw how much fake shilajit is being sold online, and how real Shilajit was hard to find for a fair price.</p>
-                    <p className="body-text">Every piece I sell comes from the same batch I test myself. I dissolve it, I smell it, I know it's real before I pack it. My phone contact number is on every order. If anything is wrong, you call me directly: not a call centre, not a bot, <strong>me.</strong></p>
-                    <p className="body-text" style={{ color: 'var(--gold)', fontWeight: 500, fontFamily: 'Cormorant Garamond, serif', fontSize: 20, fontStyle: 'italic' }}>
-                      "This is not a business for me right now. It is a test of trust. And I want to earn yours."
-                    </p>
+                {/* Pillar 2: Raw Rock Resin */}
+                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div style={{ 
+                    marginBottom: '20px', 
+                    width: '90px', 
+                    height: '90px', 
+                    borderRadius: '50%', 
+                    border: '2px solid rgba(184, 115, 51, 0.35)', 
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.06)',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: '#FFFFFF',
+                    transition: 'all 0.3s ease'
+                  }}>
+                    <img src="/images/apasya_resin.png" alt="Raw Rock Resin" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
-                  <div className="story__wa" style={{ marginTop: 24 }}>
-                    <a href={CONTACT_LINK} className="btn btn--phone">
-                      ✉️ Contact: {CONTACT_EMAIL}
-                    </a>
+                  <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--earth)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Raw Rock Resin</h3>
+                  <p style={{ fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.5, maxWidth: '240px', margin: 0 }}>Sun-dried raw mineral resin in its natural, unprocessed form. Zero fillers, zero processing.</p>
+                </div>
+
+                {/* Pillar 3: 85+ Trace Minerals */}
+                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div style={{ 
+                    marginBottom: '20px', 
+                    width: '90px', 
+                    height: '90px', 
+                    borderRadius: '50%', 
+                    border: '2px solid rgba(184, 115, 51, 0.35)', 
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.06)',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: '#FFFFFF',
+                    transition: 'all 0.3s ease'
+                  }}>
+                    <img src="/images/apasya_minerals.png" alt="85+ Minerals" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
+                  <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--earth)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>85+ Minerals</h3>
+                  <p style={{ fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.5, maxWidth: '240px', margin: 0 }}>High concentration of active fulvic acid and trace minerals for maximum cellular absorption.</p>
+                </div>
+
+                {/* Pillar 4: Lab Certified */}
+                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div style={{ 
+                    marginBottom: '20px', 
+                    width: '90px', 
+                    height: '90px', 
+                    borderRadius: '50%', 
+                    border: '2px solid rgba(184, 115, 51, 0.35)', 
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.06)',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: '#FFFFFF',
+                    transition: 'all 0.3s ease'
+                  }}>
+                    <img src="/images/apasya_lab.png" alt="Lab Certified" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                  <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--earth)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Lab Certified</h3>
+                  <p style={{ fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.5, maxWidth: '240px', margin: 0 }}>Rigorous laboratory testing for safety. 100% free from heavy metals or artificial chemicals.</p>
                 </div>
               </div>
             </div>
           </section>
 
           {/* 10 · PRICING (DYNAMICALLY RENDERED FROM STATE) */}
-          <section id="pricing" className="pricing">
+          <section id="pricing" className="pricing" style={{ paddingTop: '40px' }}>
             <div className="container">
               <div className="pricing__intro reveal">
                 <p className="label">Honest Pricing · Direct from Source</p>
@@ -1903,41 +2116,252 @@ export default function App() {
                 Less than ₹50 a day (the cost of one cup of chai) for energy that lasts all day
               </div>
 
-              <div className="pricing__grid reveal">
-                {products.map((p, idx) => (
-                  <div key={p._id || idx} className={`price-card ${p.featured ? 'price-card--featured' : ''}`}>
-                    {p.featured && <div className="price-card__badge">⭐ Most Ordered Pack</div>}
-                    <p className="price-card__tier">
-                      {p.name.includes('Starter') ? 'Starter Pack' : 'Best Value'}
-                    </p>
-                    <h3 className="price-card__name">{p.name.includes('Starter') ? 'Try It' : 'Commit to Health'}</h3>
-                    <p className="price-card__grams">{p.grams} · {p.supply}</p>
-                    <div style={{ fontSize: '13px', color: '#B87333', fontWeight: 700, margin: '8px 0', textAlign: 'center' }}>
-                      ⚡ Only {Math.max(0, (p.receivedQty !== undefined ? p.receivedQty : 100) - (p.soldQty !== undefined ? p.soldQty : 0))} packs left today!
-                    </div>
-                    {p.oldPrice && <div className="price-card__old">₹{p.oldPrice}</div>}
-                    <div className="price-card__price">₹{p.price}</div>
-                    <p className="price-card__per">/ one-time</p>
-                    <span className="price-card__save">
-                      Save {p.oldPrice ? Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100) : 33}% 
-                      ({p.oldPrice ? `₹${p.oldPrice - p.price}` : '₹500'} Off)
-                    </span>
-                    <div className="price-card__features" style={{ paddingTop: 16, borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      {p.features.map(f => (
-                        <div key={f} className="price-card__feature" style={{ fontWeight: f.includes('rock') || f.includes('shilajit') ? 600 : 400 }}>
-                          <span className="price-card__feature-check">✓</span>{f}
-                        </div>
-                      ))}
-                    </div>
-                    <button 
-                      onClick={() => addToCart(p)} 
-                      className={`btn ${p.featured ? 'btn--earth-solid' : 'btn--outline'}`} 
-                      style={{ marginTop: 'auto', border: p.featured ? 'none' : '1.5px solid var(--gold)', cursor: 'pointer' }}
+              <div className="pricing__grid reveal" style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+                gap: '32px', 
+                maxWidth: '820px', 
+                margin: '0 auto 36px',
+                alignItems: 'stretch'
+              }}>
+                {products.map((p, idx) => {
+                  const isBestValue = p.featured || p.name.toLowerCase().includes('best') || idx === 1;
+                  const offPercent = p.oldPrice ? Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100) : 33;
+                  const stockLeft = Math.max(0, (p.receivedQty !== undefined ? p.receivedQty : 100) - (p.soldQty !== undefined ? p.soldQty : 0));
+                  
+                  // Card specific styles matching Image 3
+                  const cardBg = '#FFFFFF';
+                  const cardBorder = isBestValue ? '2.5px solid #1B3D2B' : '1.5px solid rgba(13,36,23,0.1)';
+                  const cardPadding = '40px 28px 32px';
+                  const cardBorderRadius = '24px';
+                  const cardShadow = isBestValue ? '0 16px 40px rgba(27,61,43,0.08)' : '0 12px 24px rgba(13,36,23,0.03)';
+                  
+                  // Label & Headings
+                  const packLabel = isBestValue ? 'BEST VALUE' : 'STARTER PACK';
+                  const packHeading = isBestValue ? 'Commit to Health' : 'Try It';
+                  const packSub = isBestValue ? '25g jar · 1.5 months supply' : '10g jar · 15-day supply';
+                  const packFeatures = isBestValue 
+                    ? ['25g pure shilajit rock', 'Free fast home shipping', 'COD: Pay when it arrives', '15-day money-back guarantee']
+                    : ['10g pure rock resin', 'COD available', '15-day money-back guarantee'];
+                  
+                  return (
+                    <div 
+                      key={p._id || idx} 
+                      style={{
+                        background: cardBg,
+                        border: cardBorder,
+                        borderRadius: cardBorderRadius,
+                        padding: cardPadding,
+                        boxShadow: cardShadow,
+                        position: 'relative',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        transition: 'all 0.3s ease',
+                        cursor: 'default'
+                      }}
                     >
-                      Add to Cart <ShoppingBag size={14} style={{ display: 'inline', marginLeft: 4, verticalAlign: 'middle' }} />
-                    </button>
-                  </div>
-                ))}
+                      {/* Top Badge for Best Value Card */}
+                      {isBestValue && (
+                        <div style={{
+                          position: 'absolute',
+                          top: '-14px',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          background: '#1B3D2B',
+                          color: '#FFFFFF',
+                          padding: '5px 16px',
+                          borderRadius: '100px',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          letterSpacing: '0.08em',
+                          whiteSpace: 'nowrap',
+                          zIndex: 10,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          boxShadow: '0 4px 10px rgba(27,61,43,0.2)'
+                        }}>
+                          ⭐ MOST ORDERED PACK
+                        </div>
+                      )}
+
+                      <div>
+                        {/* Tier Label */}
+                        <div style={{ 
+                          fontSize: '11px', 
+                          fontWeight: 700, 
+                          letterSpacing: '0.12em', 
+                          color: isBestValue ? '#1B3D2B' : 'rgba(13,36,23,0.5)',
+                          textTransform: 'uppercase', 
+                          marginBottom: '8px',
+                          textAlign: 'left'
+                        }}>
+                          {packLabel}
+                        </div>
+
+                        {/* Heading */}
+                        <h3 style={{ 
+                          fontFamily: 'Cormorant Garamond, serif', 
+                          fontSize: '32px', 
+                          fontWeight: 700, 
+                          color: '#0D2417', 
+                          margin: '0 0 6px 0',
+                          textAlign: 'left',
+                          lineHeight: 1.15
+                        }}>
+                          {packHeading}
+                        </h3>
+
+                        {/* Grams & Supply */}
+                        <p style={{ 
+                          fontSize: '13.5px', 
+                          color: 'var(--muted)', 
+                          margin: '0 0 16px 0',
+                          textAlign: 'left',
+                          fontWeight: 400
+                        }}>
+                          {packSub}
+                        </p>
+
+                        {/* Stock Left Notification */}
+                        <div style={{ 
+                          fontSize: '13px', 
+                          color: '#D97706', 
+                          fontWeight: 600, 
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          margin: '0 0 20px 0',
+                          textAlign: 'left'
+                        }}>
+                          ⚡ Only {stockLeft} packs left today!
+                        </div>
+
+                        {/* Pricing Box */}
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', margin: '0 0 20px 0' }}>
+                          <span style={{ 
+                            fontSize: '15px', 
+                            textDecoration: 'line-through', 
+                            color: 'rgba(13,36,23,0.4)', 
+                            fontWeight: 500,
+                            marginBottom: '4px'
+                          }}>
+                            ₹{p.oldPrice}
+                          </span>
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                            <span style={{ 
+                              fontFamily: 'Cormorant Garamond, serif', 
+                              fontSize: '52px', 
+                              fontWeight: 700, 
+                              color: '#B87333', 
+                              lineHeight: 1 
+                            }}>
+                              ₹{p.price}
+                            </span>
+                          </div>
+                          <span style={{ 
+                            fontSize: '12.5px', 
+                            color: 'rgba(13,36,23,0.5)', 
+                            marginTop: '2px' 
+                          }}>
+                            / one-time
+                          </span>
+                        </div>
+
+                        {/* Discount Save Badge */}
+                        <div style={{ textAlign: 'left', margin: '0 0 28px 0' }}>
+                          <span style={{ 
+                            background: isBestValue ? '#E6F4EA' : '#FEF3C7', 
+                            color: isBestValue ? '#137333' : '#B45309', 
+                            padding: '6px 14px', 
+                            borderRadius: '100px', 
+                            fontSize: '12px', 
+                            fontWeight: 700, 
+                            display: 'inline-block' 
+                          }}>
+                            Save {offPercent}% (₹{p.oldPrice - p.price} Off)
+                          </span>
+                        </div>
+
+                        {/* Divider Line */}
+                        <div style={{ borderBottom: '1px solid rgba(13,36,23,0.08)', margin: '0 0 24px 0' }} />
+
+                        {/* Features Checklist */}
+                        <div style={{ 
+                          display: 'flex', 
+                          flexDirection: 'column', 
+                          gap: '14px', 
+                          marginBottom: '32px',
+                          textAlign: 'left'
+                        }}>
+                          {packFeatures.map(f => (
+                            <div key={f} style={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: '10px',
+                              fontSize: '14px',
+                              color: 'var(--ink)',
+                              fontWeight: f.includes('rock') || f.includes('shilajit') ? 600 : 400
+                            }}>
+                              <span style={{ 
+                                color: isBestValue ? '#1B3D2B' : '#B87333', 
+                                fontWeight: 700,
+                                fontSize: '15px'
+                              }}>
+                                ✓
+                              </span>
+                              <span>{f}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* CTA Button always visible at the bottom */}
+                      <div>
+                        <button 
+                          onClick={() => addToCart(p)} 
+                          style={{ 
+                            width: '100%', 
+                            height: '48px', 
+                            borderRadius: '8px',
+                            background: isBestValue ? '#1B3D2B' : 'transparent',
+                            border: isBestValue ? 'none' : '2px solid #B87333',
+                            color: isBestValue ? '#FFFFFF' : '#B87333',
+                            fontWeight: 700,
+                            fontSize: '13px',
+                            letterSpacing: '0.05em',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            transition: 'all 0.2s ease',
+                            boxShadow: isBestValue ? '0 4px 14px rgba(27,61,43,0.15)' : 'none'
+                          }}
+                          onMouseEnter={e => {
+                            if (isBestValue) {
+                              e.currentTarget.style.background = '#12291d';
+                              e.currentTarget.style.boxShadow = '0 6px 18px rgba(27,61,43,0.25)';
+                            } else {
+                              e.currentTarget.style.background = 'rgba(184,115,51,0.08)';
+                            }
+                          }}
+                          onMouseLeave={e => {
+                            if (isBestValue) {
+                              e.currentTarget.style.background = '#1B3D2B';
+                              e.currentTarget.style.boxShadow = '0 4px 14px rgba(27,61,43,0.15)';
+                            } else {
+                              e.currentTarget.style.background = 'transparent';
+                            }
+                          }}
+                        >
+                          <ShoppingBag size={15} /> ADD TO CART
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
               {/* Urgency */}
@@ -1945,19 +2369,88 @@ export default function App() {
                 <strong>⚠️ Only 60 units available in this batch.</strong> Next batch ships in 3 weeks. Once this is gone, it's gone till the next harvest.
               </div>
 
-              {/* Trust info row */}
-              <div className="pricing__trust reveal" style={{ borderTop: '1px solid var(--border)', paddingTop: 28 }}>
-                <div className="pricing__trust-item">
-                  <span style={{ fontSize: 18 }}>🔒</span><span>100% Secure · COD Available</span>
-                </div>
-                <div className="pricing__trust-item">
-                  <span style={{ fontSize: 18 }}>🚚</span><span>Ships in 24 hours via Shiprocket</span>
-                </div>
-                <div className="pricing__trust-item">
-                  <span style={{ fontSize: 18 }}>↩</span><span>15-day money-back guarantee</span>
-                </div>
-                <div className="pricing__trust-item">
-                  <span style={{ fontSize: 18 }}>✉️</span><span>Contact: {CONTACT_EMAIL}</span>
+              {/* Trust info row - Redesigned into 4 premium boxes (Image 1 Style Row) */}
+              <div className="reveal" style={{ borderTop: '1px solid var(--border)', paddingTop: '40px', marginTop: '16px' }}>
+                <div className="hero-trust-row-grid">
+                  {/* Card 1: 100% Secure */}
+                  <div style={{
+                    background: '#FFFFFF',
+                    border: '1.5px solid rgba(13,36,23,0.06)',
+                    borderRadius: '16px',
+                    padding: '24px 16px',
+                    textAlign: 'center',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.015)'
+                  }}>
+                    <div style={{ color: '#1B3D2B', marginBottom: '8px' }}>
+                      <Lock size={24} strokeWidth={1.5} />
+                    </div>
+                    <h4 style={{ fontSize: '12px', fontWeight: 700, color: '#1B3D2B', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 6px 0' }}>100% Secure</h4>
+                    <div style={{ width: '24px', height: '1px', background: 'rgba(13,36,23,0.12)', margin: '0 auto 8px' }} />
+                    <p style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: 1.4, margin: 0 }}>Secure transactions with cash-on-delivery options.</p>
+                  </div>
+
+                  {/* Card 2: Ships in 24 hrs */}
+                  <div style={{
+                    background: '#FFFFFF',
+                    border: '1.5px solid rgba(13,36,23,0.06)',
+                    borderRadius: '16px',
+                    padding: '24px 16px',
+                    textAlign: 'center',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.015)'
+                  }}>
+                    <div style={{ color: '#1B3D2B', marginBottom: '8px' }}>
+                      <Truck size={24} strokeWidth={1.5} />
+                    </div>
+                    <h4 style={{ fontSize: '12px', fontWeight: 700, color: '#1B3D2B', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 6px 0' }}>Express Shipping</h4>
+                    <div style={{ width: '24px', height: '1px', background: 'rgba(13,36,23,0.12)', margin: '0 auto 8px' }} />
+                    <p style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: 1.4, margin: 0 }}>Dispatched within 24 hours via Shiprocket express.</p>
+                  </div>
+
+                  {/* Card 3: 15-day Guarantee */}
+                  <div style={{
+                    background: '#FFFFFF',
+                    border: '1.5px solid rgba(13,36,23,0.06)',
+                    borderRadius: '16px',
+                    padding: '24px 16px',
+                    textAlign: 'center',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.015)'
+                  }}>
+                    <div style={{ color: '#1B3D2B', marginBottom: '8px' }}>
+                      <ShieldCheck size={24} strokeWidth={1.5} />
+                    </div>
+                    <h4 style={{ fontSize: '12px', fontWeight: 700, color: '#1B3D2B', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 6px 0' }}>15-Day Return</h4>
+                    <div style={{ width: '24px', height: '1px', background: 'rgba(13,36,23,0.12)', margin: '0 auto 8px' }} />
+                    <p style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: 1.4, margin: 0 }}>Satisfied or receive a hassle-free money-back refund.</p>
+                  </div>
+
+                  {/* Card 4: Support */}
+                  <div style={{
+                    background: '#FFFFFF',
+                    border: '1.5px solid rgba(13,36,23,0.06)',
+                    borderRadius: '16px',
+                    padding: '24px 16px',
+                    textAlign: 'center',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.015)'
+                  }}>
+                    <div style={{ color: '#1B3D2B', marginBottom: '8px' }}>
+                      <Mail size={24} strokeWidth={1.5} />
+                    </div>
+                    <h4 style={{ fontSize: '12px', fontWeight: 700, color: '#1B3D2B', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 6px 0' }}>Contact Support</h4>
+                    <div style={{ width: '24px', height: '1px', background: 'rgba(13,36,23,0.12)', margin: '0 auto 8px' }} />
+                    <p style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: 1.4, margin: 0 }}>Reach out directly to support@apasya.in any time.</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2077,6 +2570,112 @@ export default function App() {
               <a href={CONTACT_LINK} className="cta-btn" style={{ textDecoration: 'none', display: 'inline-block', textAlign: 'center' }}>
                 Contact Us
               </a>
+            </div>
+          </section>
+
+          {/* 12 · CONTACT US SECTION */}
+          <section id="contact-us" className="contact-section" style={{
+            background: '#FAF6F0',
+            padding: '80px 24px',
+            borderTop: '1px solid var(--border)',
+            borderBottom: '1px solid var(--border)',
+            fontFamily: 'Inter, sans-serif'
+          }}>
+            <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
+              <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+                <p className="label" style={{ letterSpacing: '0.12em', color: '#B87333', marginBottom: '12px', textTransform: 'uppercase', fontSize: '11px', fontWeight: 700 }}>GET IN TOUCH</p>
+                <h2 className="h2" style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px, 3.5vw, 42px)', color: '#0D2417', margin: 0, fontWeight: 700 }}>Contact Our Healers</h2>
+                <div style={{ width: '60px', height: '3px', background: '#B87333', margin: '16px auto 0' }} />
+                <p style={{ fontSize: '15px', color: 'var(--muted)', marginTop: '16px', maxWidth: '580px', margin: '16px auto 0', lineHeight: 1.6 }}>
+                  Whether you have questions about raw Shilajit dosing, order shipping, or bulk inquiries, our dedicated support team is ready to assist you.
+                </p>
+              </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                gap: '32px',
+                alignItems: 'stretch'
+              }}>
+                {/* Contact Card 1: Email */}
+                <div style={{
+                  background: '#FFFFFF',
+                  border: '1.5px solid rgba(13,36,23,0.06)',
+                  borderRadius: '24px',
+                  padding: '40px 32px',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.015)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textAlign: 'center'
+                }}>
+                  <div style={{
+                    width: '64px',
+                    height: '64px',
+                    borderRadius: '50%',
+                    background: 'rgba(184,115,51,0.08)',
+                    color: '#B87333',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '24px'
+                  }}>
+                    <Mail size={28} strokeWidth={1.5} />
+                  </div>
+                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0D2417', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Email Support</h3>
+                  <p style={{ fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.6, margin: '0 0 20px 0', maxWidth: '260px' }}>
+                    Send us an email at any time. We respond to all customer support inquiries within 12–24 hours.
+                  </p>
+                  <a href={`mailto:${CONTACT_EMAIL}`} style={{
+                    fontSize: '15px',
+                    fontWeight: 700,
+                    color: '#B87333',
+                    textDecoration: 'none',
+                    borderBottom: '2px solid #B87333',
+                    paddingBottom: '2px',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.color = '#0D2417'}
+                  onMouseLeave={e => e.currentTarget.style.color = '#B87333'}
+                  >
+                    {CONTACT_EMAIL}
+                  </a>
+                </div>
+
+                {/* Contact Card 2: Office Address */}
+                <div style={{
+                  background: '#FFFFFF',
+                  border: '1.5px solid rgba(13,36,23,0.06)',
+                  borderRadius: '24px',
+                  padding: '40px 32px',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.015)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textAlign: 'center'
+                }}>
+                  <div style={{
+                    width: '64px',
+                    height: '64px',
+                    borderRadius: '50%',
+                    background: 'rgba(184,115,51,0.08)',
+                    color: '#B87333',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '24px'
+                  }}>
+                    <Users size={28} strokeWidth={1.5} />
+                  </div>
+                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0D2417', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Head Office</h3>
+                  <p style={{ fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.6, margin: 0, maxWidth: '280px' }}>
+                    Vaishnavi Tech Park, Ambalipura Village, Varthur Hobli, Varthur, Bengaluru, Karnataka 560103
+                  </p>
+                  <div style={{ fontSize: '12px', color: 'rgba(13,36,23,0.5)', marginTop: '20px', fontWeight: 600 }}>
+                    Mon - Sat: 9:00 AM - 6:00 PM IST
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
         </>
@@ -2778,118 +3377,153 @@ export default function App() {
                     )}
                   </div>
                 )}
-
-                {/* SUBTAB 4: INVENTORY CONTROL */}
+                {/* SUBTAB 4: INVENTORY CONTROL (12-MONTH CALENDAR) */}
                 {adminTab === 'inventory' && (
                   <div>
-                    <h3 className="h3" style={{ borderBottom: '1px solid var(--border)', paddingBottom: 12, marginBottom: 20 }}>
-                      Daily Inventory &amp; Stock Limits Manager
+                    <h3 className="h3" style={{ borderBottom: '1px solid var(--border)', paddingBottom: 12, marginBottom: 24 }}>
+                      12-Month Multi-Product Inventory Calendar &amp; Pricing Manager
                     </h3>
                     
-                    <div style={{ background: 'var(--white)', border: '1px solid var(--border)', borderRadius: 12, padding: 24, boxShadow: '0 4px 12px rgba(0,0,0,0.015)' }}>
-                      <table className="admin-orders-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
-                        <thead>
-                          <tr style={{ background: 'var(--warm)', borderBottom: '1.5px solid var(--border)' }}>
-                            <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 700 }}>Product Pack</th>
-                            <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 700 }}>Daily Limit</th>
-                            <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 700 }}>Total Received Stock</th>
-                            <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 700 }}>Sold Stock</th>
-                            <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 700 }}>Stock Left</th>
-                            <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 700 }}>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {products.map(p => {
-                            const stockLeft = Math.max(0, (p.receivedQty || 100) - (p.soldQty || 0));
-                            return (
-                              <tr key={p._id} style={{ borderBottom: '1px solid var(--border)' }}>
-                                <td style={{ padding: '16px', fontWeight: 600, color: 'var(--ink)' }}>
-                                  {p.name} ({p.grams})
-                                </td>
-                                <td style={{ padding: '16px', textAlign: 'center' }}>
-                                  <input 
-                                    type="number" 
-                                    className="form-input" 
-                                    style={{ width: '80px', textAlign: 'center', padding: '6px', margin: '0 auto' }} 
-                                    defaultValue={p.dailyLimit || 50}
-                                    id={`limit-${p._id}`}
-                                  />
-                                </td>
-                                <td style={{ padding: '16px', textAlign: 'center' }}>
-                                  <input 
-                                    type="number" 
-                                    className="form-input" 
-                                    style={{ width: '90px', textAlign: 'center', padding: '6px', margin: '0 auto' }} 
-                                    defaultValue={p.receivedQty || 100}
-                                    id={`received-${p._id}`}
-                                  />
-                                </td>
-                                <td style={{ padding: '16px', textAlign: 'center' }}>
-                                  <input 
-                                    type="number" 
-                                    className="form-input" 
-                                    style={{ width: '80px', textAlign: 'center', padding: '6px', margin: '0 auto' }} 
-                                    defaultValue={p.soldQty || 0}
-                                    id={`sold-${p._id}`}
-                                  />
-                                </td>
-                                <td style={{ padding: '16px', textAlign: 'center', fontWeight: 700, color: stockLeft <= 10 ? '#ef4444' : 'var(--green2)' }}>
-                                  {stockLeft} units
-                                </td>
-                                <td style={{ padding: '16px', textAlign: 'center' }}>
-                                  <button
-                                    className="btn btn--gold"
-                                    style={{ padding: '8px 12px', fontSize: '12px', width: 'auto', border: 'none', cursor: 'pointer' }}
-                                    onClick={async () => {
-                                      const dailyLimit = parseInt(document.getElementById(`limit-${p._id}`).value);
-                                      const receivedQty = parseInt(document.getElementById(`received-${p._id}`).value);
-                                      const soldQty = parseInt(document.getElementById(`sold-${p._id}`).value);
-                                      
-                                      try {
-                                        const res = await fetch(`${BACKEND_API_URL}/products/${p._id}`, {
-                                          method: 'PUT',
-                                          headers: { 
-                                            'Content-Type': 'application/json',
-                                            'Authorization': `Bearer ${authToken}` 
-                                          },
-                                          body: JSON.stringify({ 
-                                            name: p.name,
-                                            price: p.price,
-                                            oldPrice: p.oldPrice,
-                                            grams: p.grams,
-                                            supply: p.supply,
-                                            imageUrl: p.imageUrl,
-                                            videoUrl: p.videoUrl,
-                                            features: p.features,
-                                            dailyLimit,
-                                            receivedQty,
-                                            soldQty
-                                          })
-                                        });
-                                        const data = await res.json();
-                                        if (data.success) {
-                                          alert('Inventory metrics updated successfully for ' + p.name);
-                                          fetchProducts();
-                                        } else {
-                                          alert('Error updating inventory: ' + data.error);
-                                        }
-                                      } catch (err) {
-                                        alert('Network error updating inventory: ' + err.message);
-                                      }
-                                    }}
-                                  >
-                                    Save
-                                  </button>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
+                    {products.slice(0, 2).map((p) => {
+                      const totalAvailable = p.monthlyInventory ? p.monthlyInventory.reduce((sum, m) => sum + m.available, 0) : 1200;
+                      const totalBookings = p.monthlyInventory ? p.monthlyInventory.reduce((sum, m) => sum + m.bookings, 0) : 0;
+                      const totalDeliverablesLeft = Math.max(0, totalAvailable - totalBookings);
+
+                      return (
+                        <div key={p._id} className="admin-calendar-card">
+                          <div className="admin-calendar-title">
+                            <div>
+                              <span>📅 {p.name} ({p.grams})</span>
+                              <span style={{ fontSize: '13px', color: 'var(--muted)', fontWeight: 400, marginLeft: '12px' }}>
+                                (Overall: {totalDeliverablesLeft} deliverables left of {totalAvailable})
+                              </span>
+                            </div>
+                            <span style={{ fontSize: '12px', background: 'rgba(184, 115, 51, 0.08)', color: 'var(--gold)', padding: '4px 10px', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                              ACTIVE BATCH
+                            </span>
+                          </div>
+
+                          <div className="calendar-table-wrapper" style={{ marginBottom: '20px' }}>
+                            <table className="calendar-table">
+                              <thead>
+                                <tr>
+                                  <th className="calendar-row-label">Metric / Month</th>
+                                  {p.monthlyInventory && p.monthlyInventory.map((m) => (
+                                    <th key={m.monthIndex}>{m.monthName.substring(0, 3)}</th>
+                                  ))}
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {/* Row 1: Available */}
+                                <tr>
+                                  <td className="calendar-row-label">📦 Available</td>
+                                  {p.monthlyInventory && p.monthlyInventory.map((m) => (
+                                    <td key={m.monthIndex}>
+                                      <input 
+                                        type="number" 
+                                        className="calendar-input"
+                                        defaultValue={m.available}
+                                        id={`avail-${p._id}-${m.monthIndex}`}
+                                      />
+                                    </td>
+                                  ))}
+                                </tr>
+                                
+                                {/* Row 2: Bookings */}
+                                <tr>
+                                  <td className="calendar-row-label">🛒 Bookings</td>
+                                  {p.monthlyInventory && p.monthlyInventory.map((m) => (
+                                    <td key={m.monthIndex} style={{ fontWeight: 600, color: 'var(--muted)' }}>
+                                      {m.bookings}
+                                    </td>
+                                  ))}
+                                </tr>
+
+                                {/* Row 3: Price */}
+                                <tr>
+                                  <td className="calendar-row-label">₹ Price (INR)</td>
+                                  {p.monthlyInventory && p.monthlyInventory.map((m) => (
+                                    <td key={m.monthIndex}>
+                                      <input 
+                                        type="number" 
+                                        className="calendar-input"
+                                        defaultValue={m.price}
+                                        id={`price-${p._id}-${m.monthIndex}`}
+                                      />
+                                    </td>
+                                  ))}
+                                </tr>
+
+                                {/* Row 4: Deliverables Left */}
+                                <tr>
+                                  <td className="calendar-row-label">🚚 Leftover</td>
+                                  {p.monthlyInventory && p.monthlyInventory.map((m) => {
+                                    const left = Math.max(0, m.available - m.bookings);
+                                    return (
+                                      <td key={m.monthIndex} style={{ fontWeight: 700, color: left <= 10 ? '#ef4444' : 'var(--green2)' }}>
+                                        {left}
+                                      </td>
+                                    );
+                                  })}
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+
+                          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <button
+                              className="btn btn--gold"
+                              style={{ width: 'auto', padding: '12px 24px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '8px', border: 'none', cursor: 'pointer' }}
+                              onClick={async () => {
+                                const updatedInventory = p.monthlyInventory.map(m => {
+                                  const availVal = parseInt(document.getElementById(`avail-${p._id}-${m.monthIndex}`).value) || 0;
+                                  const priceVal = parseInt(document.getElementById(`price-${p._id}-${m.monthIndex}`).value) || 0;
+                                  return {
+                                    ...m,
+                                    available: availVal,
+                                    price: priceVal
+                                  };
+                                });
+
+                                try {
+                                  const res = await fetch(`${BACKEND_API_URL}/products/${p._id}`, {
+                                    method: 'PUT',
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                      'Authorization': `Bearer ${authToken}`
+                                    },
+                                    body: JSON.stringify({
+                                      name: p.name,
+                                      price: p.price,
+                                      oldPrice: p.oldPrice,
+                                      grams: p.grams,
+                                      supply: p.supply,
+                                      imageUrl: p.imageUrl,
+                                      videoUrl: p.videoUrl,
+                                      features: p.features,
+                                      monthlyInventory: updatedInventory
+                                    })
+                                  });
+                                  const data = await res.json();
+                                  if (data.success) {
+                                    alert('Inventory Calendar successfully updated and saved for ' + p.name);
+                                    fetchProducts();
+                                  } else {
+                                    alert('Error saving calendar: ' + data.error);
+                                  }
+                                } catch (err) {
+                                  alert('Network connection error: ' + err.message);
+                                }
+                              }}
+                            >
+                              💾 Save Inventory Calendar
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                )}
-              </>
+                )}</>
             )}
           </div>
         </section>
@@ -2919,11 +3553,12 @@ export default function App() {
 
             {/* Column 2: Navigation Links */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px 24px' }}>
-                <a href="#my-account" onClick={(e) => { e.preventDefault(); setAuthTab('login'); setIsAuthOpen(true); }} style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.05em', color: '#0D2417', textDecoration: 'none', textTransform: 'uppercase' }}>MY ACCOUNT</a>
-                <a href="#about-us" onClick={(e) => { e.preventDefault(); handleNavigate('home'); }} style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.05em', color: '#0D2417', textDecoration: 'none', textTransform: 'uppercase' }}>ABOUT US</a>
-                <a href="#faq" onClick={(e) => { e.preventDefault(); handleNavigate('home'); }} style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.05em', color: '#0D2417', textDecoration: 'none', textTransform: 'uppercase' }}>FAQS</a>
-                <a href="#contact-us" onClick={(e) => { e.preventDefault(); handleNavigate('home'); }} style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.05em', color: '#0D2417', textDecoration: 'none', textTransform: 'uppercase' }}>CONTACT US</a>
+              <h4 style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', margin: 0, textTransform: 'uppercase', color: '#0D2417' }}>QUICK NAVIGATION</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'flex-start' }}>
+                <a href="#my-account" onClick={(e) => { e.preventDefault(); setAuthTab('login'); setIsAuthOpen(true); }} style={{ fontSize: '14px', fontWeight: 600, color: 'rgba(13,36,23,0.7)', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#B87333'} onMouseLeave={e => e.currentTarget.style.color = 'rgba(13,36,23,0.7)'}>MY ACCOUNT</a>
+                <a href="#why-apasya" onClick={(e) => { e.preventDefault(); setActiveView('home'); setTimeout(() => document.getElementById('why-apasya')?.scrollIntoView({ behavior: 'smooth' }), 100); }} style={{ fontSize: '14px', fontWeight: 600, color: 'rgba(13,36,23,0.7)', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#B87333'} onMouseLeave={e => e.currentTarget.style.color = 'rgba(13,36,23,0.7)'}>ABOUT US (THE DIFFERENCE)</a>
+                <a href="#faq" onClick={(e) => { e.preventDefault(); setActiveView('home'); setTimeout(() => document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' }), 100); }} style={{ fontSize: '14px', fontWeight: 600, color: 'rgba(13,36,23,0.7)', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#B87333'} onMouseLeave={e => e.currentTarget.style.color = 'rgba(13,36,23,0.7)'}>FAQS & ANSWERS</a>
+                <a href="#contact-us" onClick={(e) => { e.preventDefault(); setActiveView('home'); setTimeout(() => document.getElementById('contact-us')?.scrollIntoView({ behavior: 'smooth' }), 100); }} style={{ fontSize: '14px', fontWeight: 600, color: 'rgba(13,36,23,0.7)', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#B87333'} onMouseLeave={e => e.currentTarget.style.color = 'rgba(13,36,23,0.7)'}>CONTACT US</a>
               </div>
             </div>
 
@@ -2941,7 +3576,7 @@ export default function App() {
                 <h4 style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', margin: 0, textTransform: 'uppercase', color: '#0D2417' }}>FOLLOW US</h4>
                 <div style={{ display: 'flex', gap: '20px' }}>
                   {['instagram', 'facebook', 'youtube', 'twitter'].map(platform => (
-                    <a key={platform} href={`https://${platform}.com`} target="_blank" rel="noreferrer" style={{ color: 'rgba(13,36,23,0.6)', transition: 'color 0.2s' }}>
+                    <a key={platform} href={platform === 'instagram' ? 'https://www.instagram.com/apasya_pahadi_shilajit?igsh=Yjd0ajJmNmdiMmRv&utm_source=qr' : `https://${platform}.com`} target="_blank" rel="noreferrer" style={{ color: 'rgba(13,36,23,0.6)', transition: 'color 0.2s' }}>
                       {platform === 'instagram' && (
                         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
                           <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>

@@ -12,7 +12,16 @@ const productSchema = new mongoose.Schema({
   featured: { type: Boolean, default: false },
   dailyLimit: { type: Number, default: 50 },
   receivedQty: { type: Number, default: 100 },
-  soldQty: { type: Number, default: 0 }
+  soldQty: { type: Number, default: 0 },
+  monthlyInventory: [
+    {
+      monthIndex: { type: Number, required: true },
+      monthName: { type: String, required: true },
+      available: { type: Number, default: 100 },
+      bookings: { type: Number, default: 0 },
+      price: { type: Number, required: true }
+    }
+  ]
 }, {
   toJSON: { virtuals: true },
   toObject: { virtuals: true }

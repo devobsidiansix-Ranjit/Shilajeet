@@ -2769,4 +2769,26 @@ footer p {
     gap: 24px;
   }
 }
+
+/* Responsive Trust Row Grid for Hero & Pricing Footers (Image 1 Style Row) */
+.hero-trust-row-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  width: 100%;
+}
+
+@media (max-width: 991px) {
+  .hero-trust-row-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 24px !important;
+  }
+}
+
+@media (max-width: 567px) {
+  .hero-trust-row-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+}
 
