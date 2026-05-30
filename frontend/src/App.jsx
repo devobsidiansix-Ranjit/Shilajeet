@@ -78,20 +78,20 @@ const PAINS = [
     icon: <Clock size={28} color="#b87333" />, 
     title: 'Premature Aging', 
     desc: 'Feel like your body is aging faster than it should', 
-    image: '/images/aging_faster.png' 
+    image: '/images/tired_man_head.png' 
   },
 ];
 
 /* ─── BENEFITS DATA ───────────────────────── */
 const BENEFITS = [
-  { icon: <Zap size={40} color="#b87333" />,        title: 'All-Day Energy',       desc: 'No crash. No caffeine. Real cellular energy from minerals your body actually absorbs.', image: '/images/benefits/energy.png' },
-  { icon: <Brain size={40} color="#b87333" />,       title: 'Mental Clarity',       desc: 'Fulvic acid helps nutrients reach your brain. Clearer thinking, faster recall, better focus.', image: '/images/benefits/clarity.png' },
-  { icon: <ShieldCheck size={40} color="#b87333" />, title: 'Stronger Immunity',    desc: '85+ trace minerals rebuild your immune system from the ground up.', image: '/images/benefits/immunity_male.png', hoverImage: '/images/benefits/immunity_female.png' },
-  { icon: <Activity size={40} color="#b87333" />,    title: 'Faster Recovery',      desc: 'Athletes use it to recover between sessions. Wake up ready to train again.', image: '/images/benefits/recovery.png' },
+  { icon: <Zap size={40} color="#b87333" />,        title: 'All-Day Energy',       desc: 'No crash. No caffeine. Real cellular energy from minerals your body actually absorbs.', image: '/images/benefits/energy_indian.png' },
+  { icon: <Brain size={40} color="#b87333" />,       title: 'Mental Clarity',       desc: 'Fulvic acid helps nutrients reach your brain. Clearer thinking, faster recall, better focus.', image: '/images/Mental_Clarity.png' },
+  { icon: <ShieldCheck size={40} color="#b87333" />, title: 'Stronger Immunity',    desc: '85+ trace minerals rebuild your immune system from the ground up.', image: '/images/Strong_immunity.png' },
+  { icon: <Activity size={40} color="#b87333" />,    title: 'Faster Recovery',      desc: 'Athletes use it to recover between sessions. Wake up ready to train again.', image: '/images/benefits/recovery_indian.png' },
   { icon: <Moon size={40} color="#b87333" />,        title: 'Deep Sleep',           desc: 'Minerals regulate your sleep cycle. You\'ll notice the difference within 1 week.', image: '/images/benefits/sleep.png' },
-  { icon: <Flame size={40} color="#b87333" />,       title: 'Hormonal Balance',     desc: 'Works for both men and women. Naturally supports the hormones that affect energy and mood.', image: '/images/benefits/hormones_male.png', hoverImage: '/images/benefits/hormones_female.png' },
-  { icon: <Smile size={40} color="#b87333" />,       title: 'Gut Health',           desc: 'Ancient digestive support. Reduces bloating, improves nutrient absorption.', image: '/images/benefits/gut_male.png', hoverImage: '/images/benefits/gut_female.png' },
-  { icon: <Heart size={40} color="#b87333" />,       title: 'Joint & Bone Strength',desc: 'Calcium and magnesium in bioavailable form. Your joints thank you within 2–3 weeks.', image: '/images/benefits/strength_male.png', hoverImage: '/images/benefits/strength_female.png' },
+  { icon: <Flame size={40} color="#b87333" />,       title: 'Hormonal Balance',     desc: 'Works for both men and women. Naturally supports the hormones that affect energy and mood.', image: '/images/Hormonal_Balance.png' },
+  { icon: <Smile size={40} color="#b87333" />,       title: 'Gut Health',           desc: 'Ancient digestive support. Reduces bloating, improves nutrient absorption.', image: '/images/benefits/gut_indian.png' },
+  { icon: <Heart size={40} color="#b87333" />,       title: 'Joint & Bone Strength',desc: 'Calcium and magnesium in bioavailable form. Your joints thank you within 2–3 weeks.', image: '/images/Joint_Bone.png' },
 ];
 
 
@@ -1753,66 +1753,58 @@ export default function App() {
           </section>
 
           {/* 05 · BENEFITS GRID */}
-          <section className="benefits" id="benefits">
+          <section className="benefits" id="benefits" style={{ background: '#ffffff', padding: '96px 0' }}>
             <div className="container">
               <div className="benefits__intro reveal">
-                <p className="label">Full Body Transformation</p>
-                <h2 className="h2">8 ways your body changes when you start taking real Shilajit</h2>
-                <p className="body-text">Most brands market only one benefit. Real Shilajit works on all of these at the same time.</p>
+                <p className="label" style={{ color: '#B87333', marginBottom: 12 }}>Full Body Transformation</p>
+                <h2 className="h2" style={{ color: '#000000', marginBottom: 16 }}>8 ways your body changes when you start taking real Shilajit</h2>
+                <p className="body-text" style={{ color: '#000000', opacity: 0.7 }}>Most brands market only one benefit. Real Shilajit works on all of these at the same time.</p>
               </div>
               <div className="benefits__grid reveal">
-                {BENEFITS.map(({ icon, title, desc, image, hoverImage }) => {
-                  const isHovered = hoveredBenefit === title;
-                  const currentImage = (isHovered && hoverImage) ? hoverImage : image;
+                {BENEFITS.map(({ icon, title, desc, image }) => {
                   return (
                     <div 
                       key={title} 
                       className="benefit" 
-                      onMouseEnter={() => setHoveredBenefit(title)}
-                      onMouseLeave={() => setHoveredBenefit(null)}
                       style={{ 
                         display: 'flex', 
                         flexDirection: 'column', 
                         alignItems: 'center', 
                         textAlign: 'center', 
-                        background: 'var(--white)', 
-                        padding: '24px', 
-                        borderRadius: '16px', 
-                        border: '1px solid var(--border)', 
-                        boxShadow: '0 4px 20px rgba(0,0,0,0.01)', 
-                        transition: 'all 0.3s ease',
-                        cursor: hoverImage ? 'pointer' : 'default'
+                        background: '#ffffff', 
+                        padding: '16px', 
+                        border: 'none', 
+                        boxShadow: 'none', 
+                        transition: 'all 0.3s ease'
                       }}
                     >
                       <div style={{ 
                         width: '100%', 
-                        height: '200px', 
+                        height: '240px', 
                         display: 'flex', 
                         justifyContent: 'center', 
                         alignItems: 'center', 
-                        marginBottom: '16px', 
+                        marginBottom: '20px', 
                         overflow: 'hidden', 
                         borderRadius: '12px', 
-                        background: 'transparent',
+                        background: '#ffffff',
                         position: 'relative'
                       }}>
                         <img 
-                          src={currentImage} 
+                          src={image} 
                           alt={title} 
                           style={{ 
-                            height: '100%', 
-                            width: '100%',
-                            objectFit: hoverImage ? 'cover' : 'contain', 
-                            transition: 'all 0.5s ease',
-                            transform: isHovered && hoverImage ? 'scale(1.05)' : 'scale(1)'
+                            maxHeight: '100%', 
+                            maxWidth: '100%',
+                            objectFit: 'contain'
                           }} 
                         />
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', justifyContent: 'center' }}>
                         {icon}
-                        <div className="benefit__title" style={{ margin: 0, fontSize: '18px', fontWeight: 700 }}>{title}</div>
+                        <div className="benefit__title" style={{ margin: 0, fontSize: '20px', fontWeight: 800, color: '#000000', fontFamily: 'Jost, sans-serif' }}>{title}</div>
                       </div>
-                      <div className="benefit__text" style={{ fontSize: '14px', color: 'var(--muted)', lineHeight: 1.5 }}>{desc}</div>
+                      <div className="benefit__text" style={{ fontSize: '14.5px', color: '#000000', opacity: 0.7, lineHeight: 1.6 }}>{desc}</div>
                     </div>
                   );
                 })}
@@ -1821,94 +1813,258 @@ export default function App() {
             </div>
           </section>
 
-          {/* KEY INGREDIENTS SECTION (Below 8 Benefits) */}
-          <section className="key-ingredients" style={{ background: 'var(--cream)', padding: '80px 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
+          {/* KEY INGREDIENTS SECTION (Below 8 Benefits) - Redesigned to We Provide vs Others Provide */}
+          <section className="key-ingredients" style={{ background: '#F9F8F6', padding: '80px 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
             <div className="container">
               <div style={{ textAlign: 'center', marginBottom: '56px' }}>
                 <p className="label" style={{ letterSpacing: '0.12em', color: '#B87333', marginBottom: '12px' }}>VITAL FORMULATION</p>
                 <h2 className="serif" style={{ fontSize: 'clamp(36px, 4vw, 48px)', color: '#0D2417', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 300 }}>
-                  <strong style={{ fontWeight: 800 }}>KEY</strong> INGREDIENTS
+                  <strong style={{ fontWeight: 800 }}>KEY INGREDIENTS </strong> 
                 </h2>
                 <div style={{ width: '60px', height: '3px', background: '#B87333', margin: '20px auto 0' }} />
               </div>
 
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: '32px 40px',
-                maxWidth: '960px',
-                margin: '0 auto'
+                gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+                gap: '40px',
+                maxWidth: '1100px',
+                margin: '0 auto',
+                alignItems: 'stretch'
               }}>
-                {[
-                  {
-                    name: 'Shilajit',
-                    desc: 'Clinically tested Shilajit rich in Fulvic acid (>60%)',
-                    img: '/images/ingredients/shilajit.png'
-                  },
-                  {
-                    name: 'Swarna Bhasma',
-                    desc: 'Contains 24 Karat Gold made with special Ayurvedic Marana Process',
-                    img: '/images/ingredients/swarna_bhasma.png'
-                  },
-                  {
-                    name: 'Gokshura',
-                    desc: 'Potent Ayurvedic herb for men\'s health & wellness',
-                    img: '/images/ingredients/gokshura.png'
-                  },
-                  {
-                    name: 'Black Musli',
-                    desc: 'Potent Ayurvedic herb for men\'s health & wellness',
-                    img: '/images/ingredients/black_musli.png'
-                  },
-                  {
-                    name: 'Nagori Ashwagandha',
-                    desc: '183rd day harvested with withanolide content',
-                    img: '/images/ingredients/ashwagandha.png'
-                  }
-                ].map((ing, i) => (
-                  <div key={ing.name} style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '24px',
-                    background: 'var(--white)',
-                    padding: '24px',
-                    borderRadius: '16px',
-                    boxShadow: '0 4px 16px rgba(13,36,23,0.02)',
-                    border: '1px solid var(--border)',
-                    gridColumn: i === 4 ? 'span 2' : 'auto',
-                    maxWidth: i === 4 ? '460px' : 'none',
-                    justifySelf: i === 4 ? 'center' : 'auto',
-                    width: '100%',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.transform = 'translateY(-3px)';
-                    e.currentTarget.style.borderColor = 'var(--gold)';
-                    e.currentTarget.style.boxShadow = '0 10px 24px rgba(13,36,23,0.06)';
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.borderColor = 'var(--border)';
-                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(13,36,23,0.02)';
-                  }}
-                  >
-                    <div style={{
-                      width: '90px',
-                      height: '90px',
-                      borderRadius: '50%',
-                      overflow: 'hidden',
-                      flexShrink: 0,
-                      border: '2px solid var(--border)',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-                    }}>
-                      <img src={ing.img} alt={ing.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                {/* Left Card: We Provide */}
+                <div style={{
+                  background: '#ffffff',
+                  borderRadius: '24px',
+                  padding: '40px 32px',
+                  border: '1.5px solid rgba(13,36,23,0.08)',
+                  boxShadow: '0 8px 32px rgba(13,36,23,0.02)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.borderColor = 'var(--earth)';
+                  e.currentTarget.style.boxShadow = '0 16px 48px rgba(13,36,23,0.08)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.borderColor = 'rgba(13,36,23,0.08)';
+                  e.currentTarget.style.boxShadow = '0 8px 32px rgba(13,36,23,0.02)';
+                }}
+                >
+                  <h3 style={{ 
+                    fontSize: 'clamp(28px, 3.5vw, 36px)', 
+                    fontWeight: 700, 
+                    color: '#2d4a36', 
+                    fontFamily: 'Cormorant Garamond, serif',
+                    margin: '0 0 24px 0' 
+                  }}>
+                    We Provide
+                  </h3>
+                  
+                  <div style={{ 
+                    width: '100%', 
+                    height: '240px', 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center', 
+                    marginBottom: '24px',
+                    overflow: 'hidden'
+                  }}>
+                    <img 
+                      src="/images/We_prov.png" 
+                      alt="Raw Shilajit" 
+                      style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} 
+                    />
+                  </div>
+
+                  <h4 style={{ 
+                    fontSize: '24px', 
+                    fontWeight: 700, 
+                    color: '#0d2417', 
+                    margin: '0 0 6px 0',
+                    fontFamily: 'Jost, sans-serif'
+                  }}>
+                    Raw Shilajit
+                  </h4>
+                  
+                  <p style={{ 
+                    fontSize: '15px', 
+                    color: '#B87333', 
+                    fontWeight: 600, 
+                    margin: '0 0 32px 0',
+                    letterSpacing: '0.05em'
+                  }}>
+                    Pure. Natural. Unprocessed.
+                  </p>
+
+                  <div style={{ 
+                    width: '100%', 
+                    height: '1px', 
+                    background: 'rgba(13,36,23,0.08)', 
+                    margin: '0 0 32px 0' 
+                  }} />
+
+                  {/* 3 Icons */}
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(3, 1fr)', 
+                    gap: '16px',
+                    width: '100%'
+                  }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ color: '#2d4a36' }}>
+                        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10"/>
+                          <path d="M12 7c3 0 5 2 5 5 0 3-2 5-5 5s-5-2-5-5c0-3 2-5 5-5z"/>
+                          <path d="M8.5 15.5l7-7"/>
+                        </svg>
+                      </div>
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#0d2417', lineHeight: 1.3 }}>100% Pure &amp; Natural</span>
                     </div>
-                    <div style={{ textAlign: 'left' }}>
-                      <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--ink)', marginBottom: '6px' }}>{ing.name}</h3>
-                      <p style={{ fontSize: '14.5px', color: 'var(--muted)', lineHeight: 1.45, fontWeight: 400, margin: 0 }}>{ing.desc}</p>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ color: '#2d4a36' }}>
+                        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M3 20L10 6L17 20" />
+                          <path d="M14 20L18 12L22 20" />
+                        </svg>
+                      </div>
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#0d2417', lineHeight: 1.3 }}>Raw &amp; Unprocessed</span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ color: '#2d4a36' }}>
+                        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                          <path d="M9 11l2 2 4-4" />
+                        </svg>
+                      </div>
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#0d2417', lineHeight: 1.3 }}>No Additives or Fillers</span>
                     </div>
                   </div>
-                ))}
+
+                </div>
+
+                {/* Right Card: Others Provide */}
+                <div style={{
+                  background: '#ffffff',
+                  borderRadius: '24px',
+                  padding: '40px 32px',
+                  border: '1.5px solid rgba(0,0,0,0.06)',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.01)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.borderColor = 'rgba(0,0,0,0.15)';
+                  e.currentTarget.style.boxShadow = '0 16px 48px rgba(0,0,0,0.06)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)';
+                  e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.01)';
+                }}
+                >
+                  <h3 style={{ 
+                    fontSize: 'clamp(28px, 3.5vw, 36px)', 
+                    fontWeight: 700, 
+                    color: '#4a4a4a', 
+                    fontFamily: 'Cormorant Garamond, serif',
+                    margin: '0 0 24px 0' 
+                  }}>
+                    Others Provide
+                  </h3>
+                  
+                  <div style={{ 
+                    width: '100%', 
+                    height: '240px', 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center', 
+                    marginBottom: '24px',
+                    overflow: 'hidden'
+                  }}>
+                    <img 
+                      src="/images/Oth_p.png" 
+                      alt="Liquids, Powders &amp; Capsules" 
+                      style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} 
+                    />
+                  </div>
+
+                  <h4 style={{ 
+                    fontSize: '24px', 
+                    fontWeight: 700, 
+                    color: '#222222', 
+                    margin: '0 0 6px 0',
+                    fontFamily: 'Jost, sans-serif'
+                  }}>
+                    Liquids, Powders &amp; Capsules
+                  </h4>
+                  
+                  <p style={{ 
+                    fontSize: '15px', 
+                    color: '#666666', 
+                    fontWeight: 600, 
+                    margin: '0 0 32px 0',
+                    letterSpacing: '0.05em'
+                  }}>
+                    Often Mixed. Highly Processed.
+                  </p>
+
+                  <div style={{ 
+                    width: '100%', 
+                    height: '1px', 
+                    background: 'rgba(0,0,0,0.06)', 
+                    margin: '0 0 32px 0' 
+                  }} />
+
+                  {/* 3 Icons */}
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(3, 1fr)', 
+                    gap: '16px',
+                    width: '100%'
+                  }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ color: '#777777' }}>
+                        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M6 3h12M8 3v7L4 18c-.8 1.4.2 3 1.8 3h12.4c1.6 0 2.6-1.6 1.8-3L16 10V3" />
+                          <path d="M6 14h12" />
+                        </svg>
+                      </div>
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#444444', lineHeight: 1.3 }}>May Contain Additives</span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ color: '#777777' }}>
+                        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 22a7 7 0 0 0 7-7c0-4.3-7-13-7-13S5 10.7 5 15a7 7 0 0 0 7 7z" />
+                        </svg>
+                      </div>
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#444444', lineHeight: 1.3 }}>Diluted or Mixed</span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ color: '#d9534f' }}>
+                        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10" />
+                          <path d="M15 9l-6 6M9 9l6 6" />
+                        </svg>
+                      </div>
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#d9534f', lineHeight: 1.3 }}>Not Pure Shilajit</span>
+                    </div>
+                  </div>
+
+                </div>
               </div>
             </div>
           </section>
@@ -2539,11 +2695,11 @@ export default function App() {
           </section>
 
           {/* 11 · GUARANTEE */}
-          <section className="guarantee" id="guarantee">
+          <section className="guarantee" id="guarantee" style={{ background: '#ffffff', padding: '80px 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
             <div className="container--narrow">
-              <div className="reveal shield-pulse guarantee__shield">🛡️</div>
-              <h2 className="reveal h2">Try it for 15 days, or your money back</h2>
-              <p className="reveal body-text">
+              <div className="reveal shield-pulse guarantee__shield" style={{ background: 'rgba(13,36,23,0.06)', border: '2px solid rgba(13,36,23,0.15)', margin: '0 auto 20px' }}>🛡️</div>
+              <h2 className="reveal h2" style={{ color: 'var(--ink)', margin: '20px 0 16px' }}>Try it for 15 days, or your money back</h2>
+              <p className="reveal body-text" style={{ color: 'rgba(13,36,23,0.7)', maxWidth: 520, margin: '0 auto 32px' }}>
                 If you don't feel a difference in your energy, focus, or sleep within 15 days, email me at {CONTACT_EMAIL}. I will refund you fully. No questions asked. No forms to fill. No waiting.
               </p>
               <p className="reveal" style={{ fontSize: 15, fontStyle: 'italic', fontWeight: 600, color: 'var(--gold2)', marginBottom: 32 }}>
@@ -3684,7 +3840,7 @@ export default function App() {
               className="btn btn--gold" 
               style={{ flex: 1, fontSize: 14, padding: '10px 16px', textTransform: 'uppercase', fontWeight: 600, border: 'none', cursor: 'pointer' }}
             >
-              Add to Cart: COD Available
+              Buy Now
             </button>
           </div>
         </div>
