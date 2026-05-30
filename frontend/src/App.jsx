@@ -1951,7 +1951,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="reveal" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', height: '100%', justifyContent: 'space-between' }}>
+                <div className="reveal" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
                   <div style={{
                     borderRadius: 24,
                     overflow: 'hidden',
@@ -1960,9 +1960,9 @@ export default function App() {
                     background: '#ffffff',
                     position: 'relative',
                     width: '100%',
-                    maxWidth: '544px',
+                    maxWidth: '580px',
+                    margin: '0 auto',
                     display: 'flex',
-                    flexDirection: 'column',
                     justifyContent: 'center',
                     alignItems: 'center'
                   }}>
@@ -1973,7 +1973,7 @@ export default function App() {
                       muted 
                       loop 
                       playsInline
-                      style={{ width: '100%', height: 'auto', display: 'block' }} 
+                      style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} 
                     />
                   </div>
                   <p style={{
