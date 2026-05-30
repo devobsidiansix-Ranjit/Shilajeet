@@ -1961,6 +1961,7 @@ export default function App() {
                     position: 'relative',
                     width: '100%',
                     maxWidth: '580px',
+                    height: '520px',
                     margin: '0 auto',
                     display: 'flex',
                     justifyContent: 'center',
@@ -1973,7 +1974,7 @@ export default function App() {
                       muted 
                       loop 
                       playsInline
-                      style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} 
+                      style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} 
                     />
                   </div>
                   <p style={{
