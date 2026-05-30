@@ -1961,10 +1961,10 @@ export default function App() {
                     position: 'relative',
                     width: '100%',
                     maxWidth: '544px',
-                    flex: 1,
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center'
                   }}>
                     <video 
                       src="/Home.mp4" 
@@ -1973,7 +1973,7 @@ export default function App() {
                       muted 
                       loop 
                       playsInline
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} 
+                      style={{ width: '100%', height: 'auto', display: 'block' }} 
                     />
                   </div>
                   <p style={{
