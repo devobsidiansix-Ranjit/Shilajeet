@@ -15,6 +15,24 @@ const orderSchema = new mongoose.Schema({
   quantity: { type: Number, default: 1 },
   paymentStatus: { type: String, default: 'PENDING' }, // 'PENDING', 'PAID', 'FAILED'
   deliveryStatus: { type: String, default: 'Processing' }, // 'Processing', 'Packing', 'Shipping', 'Out for Delivery', 'Delivered'
+  shippingDetails: {
+    consignmentReference: { type: String },
+    courierPartner: { type: String },
+    courierAccount: { type: String },
+    courierPartnerReferenceNumber: { type: String },
+    consignmentStatus: { type: String },
+    isCrossBorder: { type: Boolean, default: false },
+    ewayBill: { type: String },
+    city: { type: String },
+    district: { type: String },
+    weight: { type: Number },
+    dimensions: {
+      length: { type: Number },
+      width: { type: Number },
+      height: { type: Number }
+    },
+    events: { type: Array, default: [] }
+  },
   createdAt: { type: Date, default: Date.now }
 });
 

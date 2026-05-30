@@ -26,15 +26,60 @@ const SIMULATE_PAYMENT = false;
 
 /* ─── PAIN CARDS DATA (3x3 Grid) ──────────── */
 const PAINS = [
-  { icon: <Moon size={28} color="#b87333" />, text: 'Wake up exhausted, no matter how long you slept', image: '/images/Wake_up.png' },
-  { icon: <Coffee size={28} color="#b87333" />, text: 'Energy crashes after one hour of work', image: '/images/Energy_Crash (2).png' },
-  { icon: <Activity size={28} color="#b87333" />, text: 'Gym performance has plateaued for months', image: '/images/Gym_perf.png' },
-  { icon: <Brain size={28} color="#b87333" />, text: 'Brain fog sets in by mid-afternoon', image: '/images/Brain_fog (2).png' },
-  { icon: <Flame size={28} color="#b87333" />, text: 'Sleep is broken, shallow and not refreshing', image: '/images/Sleep_is_broken.png' },
-  { icon: <ShieldCheck size={28} color="#b87333" />, text: 'Falling sick repeatedly: weak immunity', image: '/images/FallingSick.png' },
-  { icon: <Heart size={28} color="#b87333" />, text: 'Joints ache after basic activity or workouts', image: '/images/Joint_ache.png' },
-  { icon: <AlertCircle size={28} color="#b87333" />, text: "Supplements you've tried didn't deliver", image: '/images/Supplement.png' },
-  { icon: <Clock size={28} color="#b87333" />, text: 'Feel like your body is aging faster than it should', image: '/images/aging_faster.png' },
+  { 
+    icon: <Moon size={28} color="#b87333" />, 
+    title: 'Wake Up Exhausted', 
+    desc: 'Wake up exhausted, no matter how long you slept', 
+    image: '/images/Wake_up.png' 
+  },
+  { 
+    icon: <Coffee size={28} color="#b87333" />, 
+    title: 'Energy Crashes', 
+    desc: 'Energy crashes after one hour of work', 
+    image: '/images/Energy_Crash (2).png' 
+  },
+  { 
+    icon: <Activity size={28} color="#b87333" />, 
+    title: 'Plateaued Performance', 
+    desc: 'Gym performance has plateaued for months', 
+    image: '/images/Gym_perf.png' 
+  },
+  { 
+    icon: <Brain size={28} color="#b87333" />, 
+    title: 'Mid-Day Brain Fog', 
+    desc: 'Brain fog sets in by mid-afternoon', 
+    image: '/images/Brain_fog (2).png' 
+  },
+  { 
+    icon: <Flame size={28} color="#b87333" />, 
+    title: 'Broken Sleep', 
+    desc: 'Sleep is broken, shallow and not refreshing', 
+    image: '/images/Sleep_is_broken.png' 
+  },
+  { 
+    icon: <ShieldCheck size={28} color="#b87333" />, 
+    title: 'Weak Immunity', 
+    desc: 'Falling sick repeatedly: weak immunity', 
+    image: '/images/FallingSick.png' 
+  },
+  { 
+    icon: <Heart size={28} color="#b87333" />, 
+    title: 'Joint Aches', 
+    desc: 'Joints ache after basic activity or workouts', 
+    image: '/images/Joint_ache.png' 
+  },
+  { 
+    icon: <AlertCircle size={28} color="#b87333" />, 
+    title: 'No Results', 
+    desc: "Supplements you've tried didn't deliver", 
+    image: '/images/Supplement.png' 
+  },
+  { 
+    icon: <Clock size={28} color="#b87333" />, 
+    title: 'Premature Aging', 
+    desc: 'Feel like your body is aging faster than it should', 
+    image: '/images/aging_faster.png' 
+  },
 ];
 
 /* ─── BENEFITS DATA ───────────────────────── */
@@ -218,7 +263,7 @@ export default function App() {
   const [heroQty, setHeroQty] = useState(1);
   const [heroActiveImgIndex, setHeroActiveImgIndex] = useState(0);
   const [activePricingId, setActivePricingId] = useState('default_starter');
-  const heroImages = ['/images/product/product_front.png','/images/product/shilajit_jar_mockup.png' , '/images/product/we_provide_vs_others.png', '/images/why_choose_pahadi.png'];
+  const heroImages = ['/images/product/product_front.png' , '/images/product/we_provide_vs_others.png', '/images/why_choose_pahadi.png'];
 
 
   const [formFields, setFormFields] = useState({
@@ -1384,7 +1429,7 @@ export default function App() {
                 style={{
                   width: '100%',
                   height: '100%',
-                  objectFit: heroActiveImgIndex === 2 ? 'contain' : 'cover'
+                  objectFit: 'contain'
                 }}
               />
 
@@ -1570,58 +1615,91 @@ export default function App() {
 
 
           {/* 03 · PAIN / PROBLEM SECTION */}
-          <section className="problem" id="problem">
+          <section className="problem" id="problem" style={{ background: '#ffffff', padding: '96px 0' }}>
             <div className="container">
               <div className="reveal">
-                <p className="label" style={{ marginBottom: 12 }}>Sound familiar?</p>
-                <h2 className="h2" style={{ marginBottom: 16 }}>Your body is telling you something.</h2>
-                <p className="body-text" style={{ maxWidth: 640, marginBottom: 24, fontSize: 18, lineHeight: 1.6 }}>
+                <p className="label" style={{ marginBottom: 12, color: '#B87333' }}>Sound familiar?</p>
+                <h2 className="h2" style={{ marginBottom: 16, color: '#000000' }}>Your body is telling you something.</h2>
+                <p className="body-text" style={{ maxWidth: 640, marginBottom: 24, fontSize: 18, lineHeight: 1.6, color: '#000000' }}>
                   These are not signs of aging. They are signs of missing minerals, minerals that every tablet and gummy brand has processed out.
                 </p>
               </div>
 
-              {/* Pain Cards 3x3 Grid */}
-              <div className="problem__grid reveal">
+              {/* Pain Cards 3x3 Grid Redesigned to match Image 1 Style */}
+              <div className="problem__grid reveal" style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+                gap: '40px 32px', 
+                marginTop: '56px' 
+              }}>
                 {PAINS.map((card, index) => {
-                  const isAgingCard = index === 8;
                   return (
                     <div 
                       key={index} 
-                      className={`problem__card ${isAgingCard ? 'problem__card--aging' : ''}`}
+                      style={{
+                        background: '#ffffff',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        textAlign: 'center',
+                        padding: '16px',
+                        border: 'none',
+                        boxShadow: 'none'
+                      }}
                     >
-                      {isAgingCard ? (
-                        <>
-                          <img 
-                            src="/images/tired_man_head.png" 
-                            alt="Feeling tired and aging" 
-                            className="problem__card-image" 
-                            style={{ objectPosition: 'center 15%' }} 
-                          />
-                          <img 
-                            src="/images/disappointed_man_bottle.png" 
-                            alt="Disappointed with supplements" 
-                            className="problem__card-image problem__card-image--hover" 
-                            style={{ objectPosition: 'center 15%' }} 
-                          />
-                        </>
-                      ) : (
-                        <img src={card.image} alt={card.text} className="problem__card-image" />
-                      )}
-                      <div className="problem__card-overlay" />
-                      <div className="problem__card-content">
-                        <div className="problem__card-icon">{card.icon}</div>
-                        <div className="problem__card-text-wrapper">
-                          <p className="problem__card-text">{card.text}</p>
-                          <div className="problem__card-line" />
-                        </div>
+                      <div style={{
+                        width: '100%',
+                        height: '240px',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginBottom: '20px',
+                        overflow: 'hidden',
+                        borderRadius: '12px',
+                        background: 'transparent'
+                      }}>
+                        <img 
+                          src={card.image} 
+                          alt={card.title} 
+                          style={{
+                            maxHeight: '100%',
+                            maxWidth: '100%',
+                            objectFit: 'contain'
+                          }} 
+                        />
                       </div>
+                      <h3 style={{
+                        fontSize: '20px',
+                        fontWeight: 800,
+                        color: '#000000',
+                        marginBottom: '8px',
+                        fontFamily: 'Jost, sans-serif'
+                      }}>
+                        {card.title}
+                      </h3>
+                      <p style={{
+                        fontSize: '14.5px',
+                        color: '#374151',
+                        lineHeight: '1.5',
+                        margin: 0,
+                        fontWeight: 400,
+                        fontFamily: 'Jost, sans-serif',
+                        maxWidth: '280px'
+                      }}>
+                        {card.desc}
+                      </p>
                     </div>
                   );
                 })}
               </div>
 
               {/* Bridge line */}
-              <div className="problem__bridge reveal">
+              <div className="problem__bridge reveal" style={{
+                background: '#FAF6F0',
+                color: '#0d2417',
+                border: '1px solid rgba(13,36,23,0.06)',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.015)'
+              }}>
                 "There's a reason none of those supplements worked. They were all processed. Diluted. Artificial. The real answer has been in the mountains for 5,000 years."
               </div>
             </div>
@@ -1882,17 +1960,20 @@ export default function App() {
                     background: '#ffffff',
                     position: 'relative',
                     width: '100%',
-                    maxWidth: '680px',
+                    maxWidth: '544px',
                     flex: 1,
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '24px'
+                    justifyContent: 'center'
                   }}>
-                    <img 
-                      src="/images/how_to_consume.png" 
-                      alt="How to Consume Pahadi Shilajit" 
-                      style={{ width: '100%', maxHeight: '100%', objectFit: 'contain', display: 'block' }} 
+                    <video 
+                      src="/Home.mp4" 
+                      controls 
+                      autoPlay 
+                      muted 
+                      loop 
+                      playsInline
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} 
                     />
                   </div>
                   <p style={{
@@ -2592,10 +2673,9 @@ export default function App() {
               </div>
 
               <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                gap: '32px',
-                alignItems: 'stretch'
+                display: 'flex',
+                justifyContent: 'center',
+                width: '100%'
               }}>
                 {/* Contact Card 1: Email */}
                 <div style={{
@@ -2607,7 +2687,9 @@ export default function App() {
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  textAlign: 'center'
+                  textAlign: 'center',
+                  maxWidth: '460px',
+                  width: '100%'
                 }}>
                   <div style={{
                     width: '64px',
@@ -2640,40 +2722,6 @@ export default function App() {
                   >
                     {CONTACT_EMAIL}
                   </a>
-                </div>
-
-                {/* Contact Card 2: Office Address */}
-                <div style={{
-                  background: '#FFFFFF',
-                  border: '1.5px solid rgba(13,36,23,0.06)',
-                  borderRadius: '24px',
-                  padding: '40px 32px',
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.015)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  textAlign: 'center'
-                }}>
-                  <div style={{
-                    width: '64px',
-                    height: '64px',
-                    borderRadius: '50%',
-                    background: 'rgba(184,115,51,0.08)',
-                    color: '#B87333',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: '24px'
-                  }}>
-                    <Users size={28} strokeWidth={1.5} />
-                  </div>
-                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0D2417', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Head Office</h3>
-                  <p style={{ fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.6, margin: 0, maxWidth: '280px' }}>
-                    Vaishnavi Tech Park, Ambalipura Village, Varthur Hobli, Varthur, Bengaluru, Karnataka 560103
-                  </p>
-                  <div style={{ fontSize: '12px', color: 'rgba(13,36,23,0.5)', marginTop: '20px', fontWeight: 600 }}>
-                    Mon - Sat: 9:00 AM - 6:00 PM IST
-                  </div>
                 </div>
               </div>
             </div>
@@ -3575,7 +3623,7 @@ export default function App() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <h4 style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', margin: 0, textTransform: 'uppercase', color: '#0D2417' }}>FOLLOW US</h4>
                 <div style={{ display: 'flex', gap: '20px' }}>
-                  {['instagram', 'facebook', 'youtube', 'twitter'].map(platform => (
+                  {['instagram', 'facebook'].map(platform => (
                     <a key={platform} href={platform === 'instagram' ? 'https://www.instagram.com/apasya_pahadi_shilajit?igsh=Yjd0ajJmNmdiMmRv&utm_source=qr' : `https://${platform}.com`} target="_blank" rel="noreferrer" style={{ color: 'rgba(13,36,23,0.6)', transition: 'color 0.2s' }}>
                       {platform === 'instagram' && (
                         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
@@ -3587,17 +3635,6 @@ export default function App() {
                       {platform === 'facebook' && (
                         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
                           <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-                        </svg>
-                      )}
-                      {platform === 'youtube' && (
-                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-                          <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
-                          <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
-                        </svg>
-                      )}
-                      {platform === 'twitter' && (
-                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-                          <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
                         </svg>
                       )}
                     </a>
