@@ -3746,11 +3746,7 @@ export default function App() {
             {/* Column 1: Logo & Info */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <img src="/logo.png" alt="APASYA" style={{ height: '48px', width: 'auto', alignSelf: 'flex-start' }} />
-              <p style={{ fontSize: '14px', lineHeight: '1.6', color: 'rgba(13,36,23,0.7)', margin: 0 }}>
-                No 16-1 and 17-2, Vaishnavi Tech Park,<br />
-                Ambalipura Village, Varthur Hobli, Varthur,<br />
-                Bengaluru, Karnataka 560103
-              </p>
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px' }}>
                 <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: '#B87333', textDecoration: 'none', fontWeight: 600 }}>✉️ {CONTACT_EMAIL}</a>
               </div>
