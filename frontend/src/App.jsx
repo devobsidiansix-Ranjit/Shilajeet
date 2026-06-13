@@ -171,6 +171,66 @@ const REVIEWS = [
   }
 ];
 
+/* ─── WHATSAPP AUDIO REVIEWS DATA ─────────── */
+const AUDIO_REVIEWS = [
+  {
+    name: 'Priya Sharma',
+    ageGroup: 'Middle-aged Woman | Age: 38–48 yrs',
+    avatar: '/images/review_avatar_1.png',
+    audioUrl: '/Recordings/Rec1.mpeg',
+    defaultDuration: '0:19',
+    messages: [
+      { sender: 'us', text: 'Hi Priya! How are you finding the Apasya Pahadi Shilajit? 😊', time: '10:14 AM' },
+      { sender: 'them', text: 'Hi! Yes, it\'s very good. I used to feel so tired by 4 PM, but now my energy is sustained all day. Really helps with my daily routine.', time: '10:18 AM' },
+      { sender: 'them', text: 'Let me send you a voice note explaining it, easier to talk!', time: '10:19 AM' },
+      { sender: 'them', isVoice: true, duration: '0:19', time: '10:20 AM' },
+      { sender: 'us', isVoice: true, duration: '0:19', time: '10:21 AM', isReviewAudio: true }
+    ]
+  },
+  {
+    name: 'Ramesh Kumar',
+    ageGroup: 'Older Man | Age: 55–65 yrs',
+    avatar: '/images/review_avatar_2.png',
+    audioUrl: '/Recordings/Rec2.mpeg',
+    defaultDuration: '0:18',
+    messages: [
+      { sender: 'us', text: 'Hello Ramesh ji, hope you are doing well. Just wanted to check how Shilajeet is working for you?', time: '11:05 AM' },
+      { sender: 'them', text: 'Namaste. Yes, it has helped a lot with my joint stiffness and general stamina.', time: '11:10 AM' },
+      { sender: 'them', text: 'I was skeptical at first, but after 2 weeks, results are clear. Sharing my feedback here:', time: '11:11 AM' },
+      { sender: 'them', isVoice: true, duration: '0:18', time: '11:12 AM' },
+      { sender: 'us', isVoice: true, duration: '0:18', time: '11:13 AM', isReviewAudio: true }
+    ]
+  },
+  {
+    name: 'Sunita Devi',
+    ageGroup: 'Older Woman | Age: 50–60 yrs',
+    avatar: '/images/review_avatar_3.png',
+    audioUrl: '/Recordings/Rec3.mpeg',
+    defaultDuration: '0:15',
+    messages: [
+      { sender: 'us', text: 'Hello Sunita ji! Are you noticing any changes after starting Pahadi Shilajit?', time: '04:30 PM' },
+      { sender: 'them', text: 'Hello beta. Yes, my fatigue is much less now and sleep quality has improved.', time: '04:35 PM' },
+      { sender: 'them', text: 'Sending you a voice note about my experience.', time: '04:36 PM' },
+      { sender: 'them', isVoice: true, duration: '0:15', time: '04:37 PM' },
+      { sender: 'us', isVoice: true, duration: '0:15', time: '04:38 PM', isReviewAudio: true }
+    ]
+  },
+  {
+    name: 'Ananya Patel',
+    ageGroup: 'Young Girl | Age: 19–24 yrs',
+    avatar: '/images/review_avatar_4.png',
+    audioUrl: '/Recordings/Rec4.mpeg',
+    defaultDuration: '0:16',
+    messages: [
+      { sender: 'us', text: 'Hey Ananya! How is the Shilajit working for your gym sessions?', time: '09:15 AM' },
+      { sender: 'them', text: 'Omg it\'s amazing! My workout recovery is so much faster now.', time: '09:20 AM' },
+      { sender: 'them', text: 'I\'ll send you a voice note!', time: '09:21 AM' },
+      { sender: 'them', isVoice: true, duration: '0:16', time: '09:22 AM' },
+      { sender: 'us', isVoice: true, duration: '0:16', time: '09:23 AM', isReviewAudio: true }
+    ]
+  }
+];
+
 /* ─── VS TABLE DATA ───────────────────────── */
 const VS_ROWS = [
   ['Fillers added to bind the tablet',           'Zero additives: only shilajit'],
@@ -265,6 +325,85 @@ export default function App() {
   const [activePricingId, setActivePricingId] = useState('default_starter');
   const heroImages = ['/images/product/product_front.png' , '/images/product/we_provide_vs_others.png', '/images/why_choose_pahadi.png'];
 
+
+
+  // WhatsApp Audio Review States & Logic
+  const [playingReviewIndex, setPlayingReviewIndex] = useState(null);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [playbackProgress, setPlaybackProgress] = useState(0);
+  const [playbackTime, setPlaybackTime] = useState('0:00');
+  const [zoomedAvatar, setZoomedAvatar] = useState(null); // { name, ageGroup, avatar }
+  
+  const activeAudioRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (activeAudioRef.current) {
+        activeAudioRef.current.pause();
+      }
+    };
+  }, []);
+
+  const formatAudioTime = (secs) => {
+    if (isNaN(secs)) return '0:00';
+    const m = Math.floor(secs / 60);
+    const s = Math.floor(secs % 60);
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+  };
+
+  const handlePlayVoiceMessage = (index, audioUrl) => {
+    if (playingReviewIndex === index) {
+      if (activeAudioRef.current) {
+        if (activeAudioRef.current.paused) {
+          activeAudioRef.current.play().catch(err => console.log('Audio play error:', err));
+          setIsAudioPlaying(true);
+        } else {
+          activeAudioRef.current.pause();
+          setIsAudioPlaying(false);
+        }
+      }
+    } else {
+      if (activeAudioRef.current) {
+        activeAudioRef.current.pause();
+      }
+
+      const audio = new Audio(audioUrl);
+      activeAudioRef.current = audio;
+      setPlayingReviewIndex(index);
+      setIsAudioPlaying(true);
+      setPlaybackProgress(0);
+      setPlaybackTime('0:00');
+
+      audio.addEventListener('timeupdate', () => {
+        if (audio.duration) {
+          const progress = (audio.currentTime / audio.duration) * 100;
+          setPlaybackProgress(progress);
+          setPlaybackTime(formatAudioTime(audio.currentTime));
+        }
+      });
+
+      audio.addEventListener('ended', () => {
+        setPlayingReviewIndex(null);
+        setIsAudioPlaying(false);
+        setPlaybackProgress(0);
+        setPlaybackTime('0:00');
+      });
+
+      audio.addEventListener('pause', () => {
+        setIsAudioPlaying(false);
+      });
+
+      audio.addEventListener('play', () => {
+        setIsAudioPlaying(true);
+      });
+
+      audio.play().catch(err => {
+        console.log('Audio play error:', err);
+        setPlayingReviewIndex(null);
+        setIsAudioPlaying(false);
+      });
+    }
+  };
 
   const [formFields, setFormFields] = useState({
     name: '',
@@ -2200,6 +2339,158 @@ export default function App() {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </section>
+
+          {/* WHATSAPP AUDIO REVIEWS SECTION */}
+          <section className="whatsapp-section" id="voice-reviews">
+            <div className="container">
+              <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                <p className="label" style={{ letterSpacing: '0.12em', color: '#B87333', marginBottom: '12px' }}>REAL AUDIO FEEDBACK</p>
+                <h2 className="serif" style={{ fontSize: 'clamp(32px, 3.5vw, 42px)', color: '#0D2417', margin: 0, fontWeight: 700 }}>Listen to Our Customers</h2>
+                <p className="body-text" style={{ maxWidth: 500, margin: '10px auto 0' }}>Authentic voice reviews shared by real users over WhatsApp.</p>
+                <div style={{ width: '60px', height: '3px', background: '#B87333', margin: '16px auto 0' }} />
+              </div>
+
+              <div className="whatsapp-grid">
+                {AUDIO_REVIEWS.map((review, idx) => {
+                  return (
+                    <div key={idx} className="whatsapp-card">
+                      {/* Header */}
+                      <div className="whatsapp-header">
+                        <div className="whatsapp-header__left">
+                          <span className="whatsapp-header__back-arrow">
+                            <ChevronLeft size={20} />
+                          </span>
+                          <div className="whatsapp-header__avatar-container" onClick={() => setZoomedAvatar(review)}>
+                            <img src={review.avatar} alt={review.name} className="whatsapp-header__avatar" />
+                          </div>
+                          <div className="whatsapp-header__info">
+                            <span className="whatsapp-header__name">{review.name}</span>
+                            <span className="whatsapp-header__status">
+                              <span className="whatsapp-header__status-dot"></span>
+                              online
+                            </span>
+                          </div>
+                        </div>
+                        <div className="whatsapp-header__right">
+                          <span className="whatsapp-header__icon">
+                            {/* Video Call Icon */}
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                              <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c0-.55-.45-1-1-1v-3.5l4 4v-11l-4 4z" />
+                            </svg>
+                          </span>
+                          <span className="whatsapp-header__icon">
+                            {/* Phone Call Icon */}
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                              <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-2.2 2.2a15.045 15.045 0 0 1-6.59-6.59l2.2-2.2c.28-.28.36-.67.25-1.02C8.79 6.3 8.6 5.1 8.6 3.87c0-.55-.45-1-1-1H4.19c-.55 0-1 .45-1 1 0 9.39 7.63 17.02 17 17.02.55 0 1-.45 1-1v-3.49c0-.55-.45-1-1-1z" />
+                            </svg>
+                          </span>
+                          <span className="whatsapp-header__icon" style={{ fontSize: '20px', fontWeight: 'bold' }}>⋮</span>
+                        </div>
+                      </div>
+
+                      {/* Chat Body */}
+                      <div className="whatsapp-body">
+                        <div className="whatsapp-date-badge">Today</div>
+
+                        {review.messages.map((msg, msgIdx) => {
+                          if (msg.isVoice) {
+                            const isReviewAudio = msg.isReviewAudio;
+                            return (
+                              <div
+                                key={msgIdx}
+                                className={`whatsapp-bubble ${msg.sender === 'us' ? 'outgoing' : 'incoming'}`}
+                                style={{ display: 'flex', flexDirection: 'column' }}
+                              >
+                                <div className="whatsapp-player">
+                                  {/* Outgoing voice note has the avatar on the left, incoming has none */}
+                                  {isReviewAudio && (
+                                    <div className="whatsapp-player__avatar-wrapper" onClick={() => setZoomedAvatar(review)}>
+                                      <img src={review.avatar} alt={review.name} className="whatsapp-player__avatar" />
+                                      <div className="whatsapp-player__mic-badge">
+                                        <svg viewBox="0 0 24 24" width="8" height="8" fill="currentColor">
+                                          <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                                          <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                                        </svg>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Play/Pause Button */}
+                                  <button
+                                    type="button"
+                                    className="whatsapp-player__play-btn"
+                                    onClick={() => handlePlayVoiceMessage(idx, review.audioUrl)}
+                                    aria-label="Play voice message"
+                                  >
+                                    {playingReviewIndex === idx && isAudioPlaying ? (
+                                      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                                      </svg>
+                                    ) : (
+                                      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style={{ marginLeft: '2px' }}>
+                                        <path d="M8 5v14l11-7z" />
+                                      </svg>
+                                    )}
+                                  </button>
+
+                                  {/* Controls, Waveform, Duration */}
+                                  <div className="whatsapp-player__controls">
+                                    <div className="whatsapp-player__waveform">
+                                      {Array.from({ length: 25 }).map((_, barIdx) => {
+                                        const heights = [8, 12, 16, 10, 14, 18, 12, 8, 14, 16, 12, 10, 14, 18, 16, 12, 8, 14, 16, 12, 10, 14, 12, 10, 8];
+                                        const barHeight = heights[barIdx] || 10;
+                                        const barProgressThreshold = (barIdx / 25) * 100;
+                                        const isActive = playingReviewIndex === idx && playbackProgress >= barProgressThreshold;
+                                        
+                                        return (
+                                          <div
+                                            key={barIdx}
+                                            className={`whatsapp-player__waveform-bar ${isActive ? 'active' : ''}`}
+                                            style={{ height: `${barHeight}px` }}
+                                          />
+                                        );
+                                      })}
+                                    </div>
+                                    <div className="whatsapp-player__meta">
+                                      <span>
+                                        {playingReviewIndex === idx ? playbackTime : review.defaultDuration}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="whatsapp-bubble__time">
+                                  <span>{msg.time}</span>
+                                  {msg.sender === 'us' && (
+                                    <span className="whatsapp-bubble__checkmarks">✓✓</span>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          } else {
+                            return (
+                              <div
+                                key={msgIdx}
+                                className={`whatsapp-bubble ${msg.sender === 'us' ? 'outgoing' : 'incoming'}`}
+                              >
+                                {msg.text}
+                                <div className="whatsapp-bubble__time">
+                                  <span>{msg.time}</span>
+                                  {msg.sender === 'us' && (
+                                    <span className="whatsapp-bubble__checkmarks">✓✓</span>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          }
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </section>
@@ -4341,6 +4632,24 @@ export default function App() {
           </div>
         )}
       </div>
+
+      {/* ZOOMED AVATAR MODAL */}
+      {zoomedAvatar && (
+        <div className="whatsapp-zoom-modal" onClick={() => setZoomedAvatar(null)}>
+          <div className="whatsapp-zoom-modal__content" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="whatsapp-zoom-modal__close-btn"
+              onClick={() => setZoomedAvatar(null)}
+            >
+              &times;
+            </button>
+            <img src={zoomedAvatar.avatar} alt={zoomedAvatar.name} className="whatsapp-zoom-modal__img" />
+            <h3 className="whatsapp-zoom-modal__name">{zoomedAvatar.name}</h3>
+            <p className="whatsapp-zoom-modal__age">{zoomedAvatar.ageGroup}</p>
+          </div>
+        </div>
+      )}
 
     </div>
   );
