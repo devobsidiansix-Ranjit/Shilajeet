@@ -16,7 +16,12 @@ export const getGuestOrders = async (req, res) => {
     if (!txnIds || !Array.isArray(txnIds)) {
       return res.status(400).json({ success: false, error: 'Transaction IDs array is required' });
     }
-    const orders = await Order.find({ txnId: { $in: txnIds } }).sort({ createdAt: -1 });
+    const orders = await Order.find({
+      $or: [
+        { txnId: { $in: txnIds } },
+        { uroPayOrderId: { $in: txnIds } }
+      ]
+    }).sort({ createdAt: -1 });
     res.json({ success: true, orders });
   } catch (error) {
     console.error('Fetch guest orders error:', error);

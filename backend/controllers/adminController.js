@@ -42,11 +42,15 @@ export const getOrders = async (req, res) => {
 
 export const updateOrderStatus = async (req, res) => {
   try {
-    const { deliveryStatus } = req.body;
+    const { deliveryStatus, paymentStatus } = req.body;
+    
+    const updateFields = {};
+    if (deliveryStatus !== undefined) updateFields.deliveryStatus = deliveryStatus;
+    if (paymentStatus !== undefined) updateFields.paymentStatus = paymentStatus;
     
     const updatedOrder = await Order.findByIdAndUpdate(
       req.params.id,
-      { deliveryStatus },
+      updateFields,
       { new: true }
     );
     

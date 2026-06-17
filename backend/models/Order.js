@@ -14,6 +14,8 @@ const orderSchema = new mongoose.Schema({
   price: { type: Number, required: true },
   quantity: { type: Number, default: 1 },
   paymentStatus: { type: String, default: 'PENDING' }, // 'PENDING', 'PAID', 'FAILED'
+  uroPayOrderId: { type: String },
+  submittedUTR: { type: String },
   deliveryStatus: { type: String, default: 'Processing' }, // 'Processing', 'Packing', 'Shipping', 'Out for Delivery', 'Delivered'
   shippingDetails: {
     consignmentReference: { type: String },

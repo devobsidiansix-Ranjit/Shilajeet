@@ -1,29 +1,24 @@
 import crypto from 'crypto';
 import { Order } from '../models/Order.js';
 import { Product } from '../models/Product.js';
+import { User } from '../models/User.js';
 
 // Environment Configuration
-const env = process.env.PHONEPE_ENV || 'SANDBOX';
-let merchantId = process.env.PHONEPE_CLIENT_ID || "M22SGYECP7TW5_2605211959";
-const fullSecret = process.env.PHONEPE_CLIENT_SECRET || "NDNlNGIyNmMtOTExMy00NWQ4LThhMDEtZDg4MzU5YWMzN2U3";
-let saltKey = fullSecret;
-let saltIndex = 1;
+const getApiKey = () => {
+  console.log("getApiKey called. Value:", process.env.UROPAY_API_KEY);
+  return process.env.UROPAY_API_KEY || 'TEST_8SS5TDJSWXNBPLSD';
+};
+const getApiSecret = () => {
+  console.log("getApiSecret called. Value:", process.env.UROPAY_API_SECRET);
+  return process.env.UROPAY_API_SECRET || 'TEST_SECRET';
+};
+const getWebhookSecret = () => process.env.UROPAY_WEBHOOK_SECRET || 'TEST_SECRET';
+const apiBaseUrl = 'https://api.uropay.me';
 
-if (fullSecret.includes('###')) {
-  const parts = fullSecret.split('###');
-  saltKey = parts[0];
-  saltIndex = parseInt(parts[1]) || 1;
-}
-
-// Fallback to standard PhonePe Sandbox V1 credentials in Sandbox mode
-if (env === 'SANDBOX') {
-  merchantId = "PGTESTPAYUAT86";
-  saltKey = "96434309-7796-489d-8924-ab56988a6076";
-  saltIndex = 1;
-  console.log("PhonePe running in SANDBOX mode. Using standard PGTESTPAYUAT86 V1 UAT credentials.");
-} else {
-  console.log(`PhonePe running in PRODUCTION mode. Merchant ID: ${merchantId}`);
-}
+// Utility helper to hash secret
+const sha512 = (str) => {
+  return crypto.createHash('sha512').update(str).digest('hex');
+};
 
 export const initiatePayment = async (req, res) => {
   try {
@@ -31,11 +26,11 @@ export const initiatePayment = async (req, res) => {
     
     const txnId = "TXN" + Date.now();
     const amountInPaise = Math.round(order.price * 100);
-    const redirectUrl = `${redirectOrigin}?txnId=${txnId}&status=check`;
 
     // Save initial order in MongoDB
+    let newOrder;
     try {
-      const newOrder = new Order({
+      newOrder = new Order({
         user: order.userId || null,
         txnId: txnId,
         name: order.name,
@@ -55,58 +50,78 @@ export const initiatePayment = async (req, res) => {
       console.log(`Initial pending order created in MongoDB for txn ${txnId}`);
     } catch (saveErr) {
       console.error("Error creating initial pending order in DB:", saveErr);
+      return res.status(500).json({ success: false, error: 'Database error' });
     }
 
-    const payPayload = {
-      merchantId: merchantId,
-      merchantTransactionId: txnId,
-      merchantUserId: "MUID" + Date.now(),
-      amount: amountInPaise,
-      redirectUrl: redirectUrl,
-      redirectMode: "REDIRECT",
-      callbackUrl: redirectUrl,
-      mobileNumber: order.phone1 || "9999999999",
-      paymentInstrument: {
-        type: "PAY_PAGE"
+    // Try to get email address for UroPay
+    let customerEmail = order.email || 'guest@shilajeet.com';
+    if (!order.email && order.userId) {
+      try {
+        const user = await User.findById(order.userId);
+        if (user && user.email) {
+          customerEmail = user.email;
+        }
+      } catch (err) {
+        console.error("Failed to query user email:", err);
       }
+    }
+
+    // Prepare payload for UroPay Generate Order API
+    const payPayload = {
+      amount: amountInPaise,
+      merchantOrderId: txnId,
+      customerName: order.name || 'Guest Customer',
+      customerEmail: customerEmail,
+      transactionNote: `For Order ${txnId}`
     };
 
-    const base64Payload = Buffer.from(JSON.stringify(payPayload)).toString('base64');
-    const stringToHash = base64Payload + "/pg/v1/pay" + saltKey;
-    const sha256 = crypto.createHash('sha256').update(stringToHash).digest('hex');
-    const checksum = sha256 + "###" + saltIndex;
+    const hashedSecret = sha512(getApiSecret());
+    const hostUrl = `${apiBaseUrl}/order/generate`;
 
-    const hostUrl = env === 'SANDBOX' 
-      ? 'https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay'
-      : 'https://api.phonepe.com/apis/hermes/pg/v1/pay';
-
-    console.log(`Calling PhonePe V1 Pay API at ${hostUrl} for order ${txnId}, amount: ₹${order.price}`);
+    console.log(`Calling UroPay Generate Order API for order ${txnId}, amount: ₹${order.price}`);
 
     const response = await fetch(hostUrl, {
       method: 'POST',
       headers: {
+        'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'X-VERIFY': checksum
+        'X-API-KEY': getApiKey(),
+        'Authorization': `Bearer ${hashedSecret}`
       },
-      body: JSON.stringify({
-        request: base64Payload
-      })
+      body: JSON.stringify(payPayload)
     });
 
-    const data = await response.json();
-    console.log("PhonePe API raw response:", JSON.stringify(data));
+    const responseText = await response.text();
+    console.log("UroPay API raw response:", responseText);
 
-    if (data.success && data.data && data.data.instrumentResponse && data.data.instrumentResponse.redirectInfo) {
-      const redirectUrlPhonePe = data.data.instrumentResponse.redirectInfo.url;
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      return res.status(response.status).json({
+        success: false,
+        error: `UroPay returned status ${response.status}: ${responseText || 'No response details'}`
+      });
+    }
+
+    if (data.status === 'success' && data.data) {
+      const { uroPayOrderId, upiString, qrCode, amountInRupees } = data.data;
+      
+      // Update order with UroPay Order ID
+      await Order.findOneAndUpdate({ txnId: txnId }, { uroPayOrderId });
+
       res.json({
         success: true,
         transactionId: txnId,
-        redirectUrl: redirectUrlPhonePe
+        uroPayOrderId,
+        upiString,
+        qrCode,
+        amountInRupees
       });
     } else {
       res.status(400).json({
         success: false,
-        error: data.message || "Failed to obtain redirect URL from PhonePe API"
+        error: data.message || "Failed to generate UroPay order details"
       });
     }
   } catch (error) {
@@ -120,109 +135,272 @@ export const initiatePayment = async (req, res) => {
 
 export const verifyPayment = async (req, res) => {
   try {
-    const { transactionId, order } = req.body;
-    console.log(`Verifying payment for Transaction: ${transactionId}`);
+    const { transactionId, referenceNumber, order } = req.body;
+    console.log(`Verifying payment for Transaction: ${transactionId}, UTR: ${referenceNumber || 'N/A'}`);
 
-    const stringToHash = `/pg/v1/status/${merchantId}/${transactionId}` + saltKey;
-    const sha256 = crypto.createHash('sha256').update(stringToHash).digest('hex');
-    const checksum = sha256 + "###" + saltIndex;
-
-    const hostUrl = env === 'SANDBOX'
-      ? `https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status/${merchantId}/${transactionId}`
-      : `https://api.phonepe.com/apis/hermes/pg/v1/status/${merchantId}/${transactionId}`;
-
-    console.log(`Calling PhonePe V1 Status API at ${hostUrl}`);
-
-    const response = await fetch(hostUrl, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-VERIFY': checksum,
-        'X-MERCHANT-ID': merchantId
-      }
+    // Fetch the order from the database
+    const dbOrder = await Order.findOne({
+      $or: [{ txnId: transactionId }, { uroPayOrderId: transactionId }]
     });
 
-    const data = await response.json();
-    console.log("PhonePe verification response:", JSON.stringify(data));
-
-    let isCompleted = false;
-    if (data.success && data.data && data.data.state === 'COMPLETED') {
-      isCompleted = true;
+    if (!dbOrder) {
+      return res.status(404).json({ success: false, error: 'Order not found' });
     }
 
-    if (isCompleted) {
-      try {
-        const updatedOrder = await Order.findOneAndUpdate(
-          { txnId: transactionId },
-          { paymentStatus: 'PAID' },
-          { new: true }
-        );
-        if (!updatedOrder) {
-          const newOrder = new Order({
-            user: order.userId || null,
-            txnId: transactionId,
-            name: order.name,
-            phone1: order.phone1,
-            phone2: order.phone2,
-            address: order.address,
-            pincode: order.pincode,
-            state: order.state,
-            country: order.country,
-            productName: order.productName,
-            price: order.price,
-            quantity: order.quantity || 1,
-            paymentStatus: 'PAID',
-            deliveryStatus: 'Processing'
-          });
-          await newOrder.save();
-          console.log(`Saved new PAID order for txn ${transactionId} (was missing pending order)`);
-
-          // Increment soldQty
-          await Product.findOneAndUpdate(
-            { name: order.productName },
-            { $inc: { soldQty: order.quantity || 1 } }
-          );
-          console.log(`Incremented soldQty for product "${order.productName}" by ${order.quantity || 1}`);
-        } else {
-          console.log(`Updated pending order to PAID for txn ${transactionId}`);
-
-          // Increment soldQty using updatedOrder.productName
-          await Product.findOneAndUpdate(
-            { name: updatedOrder.productName },
-            { $inc: { soldQty: updatedOrder.quantity || 1 } }
-          );
-          console.log(`Incremented soldQty for product "${updatedOrder.productName}" by ${updatedOrder.quantity || 1}`);
-        }
-      } catch (dbError) {
-        console.error("Error saving/updating order in MongoDB:", dbError);
+    // 1. If UTR is supplied, this is a UTR submission
+    if (referenceNumber) {
+      const uId = dbOrder.uroPayOrderId;
+      if (!uId) {
+        return res.status(400).json({ success: false, error: 'Order does not have a valid UroPay Order ID' });
       }
 
-      res.json({
+      const hashedSecret = sha512(getApiSecret());
+      const updateUrl = `${apiBaseUrl}/order/update`;
+
+      console.log(`Calling UroPay Update Order API for ${uId} with UTR: ${referenceNumber}`);
+
+      const response = await fetch(updateUrl, {
+        method: 'PATCH',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'X-API-KEY': getApiKey(),
+          'Authorization': `Bearer ${hashedSecret}`
+        },
+        body: JSON.stringify({
+          uroPayOrderId: uId,
+          referenceNumber: referenceNumber
+        })
+      });
+
+      const responseText = await response.text();
+      console.log("UroPay Update Order API raw response:", responseText);
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        return res.status(response.status).json({
+          success: false,
+          error: `UroPay returned status ${response.status}: ${responseText || 'No response details'}`
+        });
+      }
+
+      if (data.status === 'success') {
+        dbOrder.submittedUTR = referenceNumber;
+        dbOrder.paymentStatus = 'PENDING'; // Still pending verification by UroPay
+        await dbOrder.save();
+
+        return res.json({
+          success: true,
+          message: 'UTR submitted successfully. Waiting for verification.'
+        });
+      } else {
+        return res.status(400).json({
+          success: false,
+          error: data.message || 'Failed to submit UTR to UroPay'
+        });
+      }
+    }
+
+    // 2. If UTR is not supplied, this is a status check/polling request
+    if (dbOrder.paymentStatus === 'PAID') {
+      return res.json({
         success: true,
         status: "PAID",
-        transactionId: transactionId
-      });
-    } else {
-      try {
-        await Order.findOneAndUpdate(
-          { txnId: transactionId },
-          { paymentStatus: 'FAILED' }
-        );
-      } catch (dbError) {
-        console.error("Error updating order to FAILED in MongoDB:", dbError);
-      }
-      
-      res.json({
-        success: false,
-        status: "FAILED",
-        message: "Payment failed or was cancelled."
+        transactionId: dbOrder.txnId
       });
     }
+
+    // Call UroPay Status API to check current state
+    const uId = dbOrder.uroPayOrderId;
+    if (!uId) {
+      return res.json({
+        success: false,
+        status: "PENDING",
+        message: "Order does not have a UroPay Order ID."
+      });
+    }
+
+    const statusUrl = `${apiBaseUrl}/order/status/${uId}`;
+    console.log(`Calling UroPay Status API for ${uId}`);
+
+      const response = await fetch(statusUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'X-API-KEY': getApiKey()
+        }
+      });
+
+      const responseText = await response.text();
+      console.log("UroPay Status API response:", responseText);
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        return res.status(response.status).json({
+          success: false,
+          error: `UroPay returned status ${response.status}: ${responseText || 'No response details'}`
+        });
+      }
+
+      if (data.status === 'success' && data.data && data.data.orderStatus === 'COMPLETED') {
+        // Payment completed! Update database
+        dbOrder.paymentStatus = 'PAID';
+        await dbOrder.save();
+
+        // Increment product soldQty
+        try {
+          await Product.findOneAndUpdate(
+            { name: dbOrder.productName },
+            { $inc: { soldQty: dbOrder.quantity || 1 } }
+          );
+          console.log(`Incremented soldQty for product "${dbOrder.productName}" by ${dbOrder.quantity || 1}`);
+        } catch (prodErr) {
+          console.error("Failed to update product sold quantity:", prodErr);
+        }
+
+        return res.json({
+          success: true,
+          status: "PAID",
+          transactionId: dbOrder.txnId
+        });
+      } else {
+        return res.json({
+          success: false,
+          status: dbOrder.paymentStatus,
+          message: "Payment is still pending or not confirmed."
+        });
+      }
   } catch (error) {
     console.error("Payment verification error:", error);
     res.status(500).json({
       success: false,
       error: error.message || "Internal server error"
     });
+  }
+};
+
+// Webhook payload reconstruction builders
+function buildTransactionPayload(payload) {
+  const FIXED_TAIL = ['uroPayOrderId', 'merchantOrderId', 'detectedAt', 'environment'];
+  const fixedSet = new Set([...FIXED_TAIL, 'event']);
+  const ordered = {};
+
+  if ('event' in payload) ordered.event = payload.event;
+
+  const middle = Object.keys(payload)
+    .filter(k => !fixedSet.has(k))
+    .sort((a, b) => a.localeCompare(b));
+  for (const k of middle) ordered[k] = payload[k];
+
+  for (const k of FIXED_TAIL) ordered[k] = payload[k] ?? null;
+
+  return ordered;
+}
+
+function buildOrderStatusPayload(payload) {
+  return {
+    event:           payload.event,
+    uroPayOrderId:   payload.uroPayOrderId,
+    merchantOrderId: payload.merchantOrderId,
+    orderStatus:     payload.orderStatus,
+    submittedUTR:    payload.submittedUTR ?? null,
+    environment:     payload.environment,
+  };
+}
+
+function buildUtrSubmittedPayload(payload) {
+  return {
+    event:           payload.event,
+    uroPayOrderId:   payload.uroPayOrderId,
+    merchantOrderId: payload.merchantOrderId,
+    orderStatus:     payload.orderStatus,
+    submittedUTR:    payload.submittedUTR ?? null,
+    amount:          payload.amount,
+    customerName:    payload.customerName,
+    customerEmail:   payload.customerEmail,
+    customerVPA:     payload.customerVPA ?? null,
+    environment:     payload.environment,
+    utrSubmittedAt:  payload.utrSubmittedAt ?? null,
+  };
+}
+
+// Webhook signature verification
+function verifyWebhookSignature(payload, secret, signature) {
+  const ordered =
+    payload.event === 'order.status.utrsubmitted' ? buildUtrSubmittedPayload(payload)
+    : 'orderStatus' in payload ? buildOrderStatusPayload(payload)
+    : buildTransactionPayload(payload);
+
+  const hashedSecret = sha512(secret);
+  const computed = crypto.createHmac('sha256', hashedSecret)
+    .update(JSON.stringify(ordered))
+    .digest('hex');
+
+  if (computed.length !== signature.length) {
+    return false;
+  }
+  return crypto.timingSafeEqual(Buffer.from(computed), Buffer.from(signature));
+}
+
+export const uropayWebhook = async (req, res) => {
+  try {
+    const signature = req.headers['x-uropay-signature'] || '';
+    const payload = req.body;
+
+    console.log("Received UroPay Webhook. Header signature:", signature);
+    console.log("Webhook body payload:", JSON.stringify(payload));
+
+    if (!verifyWebhookSignature(payload, getWebhookSecret(), signature)) {
+      console.warn("UroPay Webhook Signature mismatch. Rejecting request.");
+      return res.status(401).send('Unauthorized - Signature mismatch');
+    }
+
+    const { event, uroPayOrderId, merchantOrderId, orderStatus } = payload;
+
+    // Handle events
+    if (event === 'companion.sms.data' || (event === 'order.status.changed' && orderStatus === 'COMPLETED')) {
+      // Payment Completed! Find order by merchantOrderId (which matches our txnId) or uroPayOrderId
+      const dbOrder = await Order.findOne({
+        $or: [{ txnId: merchantOrderId }, { uroPayOrderId: uroPayOrderId }]
+      });
+
+      if (dbOrder && dbOrder.paymentStatus !== 'PAID') {
+        dbOrder.paymentStatus = 'PAID';
+        await dbOrder.save();
+        console.log(`Order ${dbOrder.txnId} marked as PAID via Webhook event: ${event}`);
+
+        // Increment product soldQty
+        try {
+          await Product.findOneAndUpdate(
+            { name: dbOrder.productName },
+            { $inc: { soldQty: dbOrder.quantity || 1 } }
+          );
+          console.log(`Incremented soldQty for product "${dbOrder.productName}" by ${dbOrder.quantity || 1}`);
+        } catch (prodErr) {
+          console.error("Failed to update product sold quantity in webhook:", prodErr);
+        }
+      }
+    } else if (event === 'order.status.utrsubmitted') {
+      // Save UTR if order status submitted
+      const dbOrder = await Order.findOne({
+        $or: [{ txnId: merchantOrderId }, { uroPayOrderId: uroPayOrderId }]
+      });
+      if (dbOrder) {
+        dbOrder.submittedUTR = payload.submittedUTR;
+        await dbOrder.save();
+        console.log(`UTR ${payload.submittedUTR} saved to order ${dbOrder.txnId} via webhook`);
+      }
+    }
+
+    // Webhooks must return HTTP 200 OK
+    res.status(200).send('Webhook Processed Successfully');
+  } catch (error) {
+    console.error("Error processing webhook:", error);
+    res.status(500).send('Internal Server Error');
   }
 };

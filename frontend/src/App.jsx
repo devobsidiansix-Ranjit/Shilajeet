@@ -415,9 +415,12 @@ export default function App() {
     country: 'India'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [paymentResult, setPaymentResult] = useState(null); // 'success' | 'failed' | 'verifying'
+  const [paymentResult, setPaymentResult] = useState(null); // 'success' | 'failed' | 'verifying' | 'paying'
   const [verifyingTxnId, setVerifyingTxnId] = useState('');
   const [formErrors, setFormErrors] = useState({});
+  const [uropayOrderDetails, setUropayOrderDetails] = useState(null);
+  const [utrNumber, setUtrNumber] = useState('');
+  const [utrError, setUtrError] = useState('');
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -469,6 +472,13 @@ export default function App() {
       setActiveView('home');
     }
   }, [location]);
+
+  // Track Meta Pixel PageView on view/route changes
+  useEffect(() => {
+    if (window.fbq) {
+      window.fbq('track', 'PageView');
+    }
+  }, [location, activeView]);
 
   // Auto-play slider for Hero Images (interval of 4 seconds, resets on user action)
   useEffect(() => {
@@ -667,7 +677,7 @@ export default function App() {
 
   // Load orders history when clicking My Orders view
   useEffect(() => {
-    if (activeView === 'orders' && authToken) {
+    if (activeView === 'orders') {
       fetchMyOrders();
     } else if (activeView === 'admin') {
       fetchAdminData();
@@ -763,7 +773,8 @@ export default function App() {
       state: formFields.state.trim(),
       country: formFields.country.trim(),
       productName: selectedProduct.name,
-      price: selectedProduct.price
+      price: selectedProduct.price,
+      email: currentUser ? currentUser.email : 'guest@shilajeet.com'
     };
     
     try {
@@ -773,9 +784,7 @@ export default function App() {
         setIsSubmitting(false);
         setPaymentResult('success');
       } else {
-        // Production PhonePe payment initiation
-        localStorage.setItem('pending_order', JSON.stringify(orderData));
-        
+        // Production UroPay payment initiation
         const response = await fetch(`${BACKEND_API_URL}/initiate-payment`, {
           method: 'POST',
           headers: {
@@ -789,13 +798,30 @@ export default function App() {
         
         const resJson = await response.json();
         
-        if (resJson.success && resJson.redirectUrl) {
-          window.location.href = resJson.redirectUrl;
+        if (resJson.success) {
+          const updatedOrderData = { ...orderData, uroPayOrderId: resJson.uroPayOrderId, txnId: resJson.transactionId };
+          localStorage.setItem('pending_order', JSON.stringify(updatedOrderData));
+          
+          try {
+            const guestTxns = JSON.parse(localStorage.getItem('shilajit_guest_txns') || '[]');
+            if (resJson.transactionId && !guestTxns.includes(resJson.transactionId)) {
+              guestTxns.push(resJson.transactionId);
+              localStorage.setItem('shilajit_guest_txns', JSON.stringify(guestTxns));
+            }
+          } catch (e) {
+            console.error('Error saving guest txn:', e);
+          }
+          
+          setUropayOrderDetails({
+            uroPayOrderId: resJson.uroPayOrderId,
+            upiString: resJson.upiString,
+            qrCode: resJson.qrCode,
+            amountInRupees: resJson.amountInRupees
+          });
+          setPaymentResult('paying');
+          setIsSubmitting(false);
         } else {
-          const detailMsg = resJson.details && resJson.details.message 
-            ? ` (${resJson.details.message})` 
-            : (resJson.details && resJson.details.code ? ` [${resJson.details.code}]` : '');
-          alert('Failed to initiate PhonePe payment: ' + (resJson.error || 'Unknown error') + detailMsg);
+          alert('Failed to initiate UroPay payment: ' + (resJson.error || 'Unknown error'));
           setIsSubmitting(false);
         }
       }
@@ -806,10 +832,20 @@ export default function App() {
     }
   };
 
-  const verifyTransaction = async (txnId) => {
-    setVerifyingTxnId(txnId);
+  const handleUtrSubmit = async (e) => {
+    e.preventDefault();
+    if (!utrNumber.trim()) {
+      setUtrError('UPI Reference Number / UTR is required');
+      return;
+    }
+    if (!/^\d{12}$/.test(utrNumber.trim())) {
+      setUtrError('UTR must be a 12-digit number');
+      return;
+    }
+    
+    setUtrError('');
     setPaymentResult('verifying');
-    setIsCheckoutOpen(true);
+    setVerifyingTxnId(uropayOrderDetails?.uroPayOrderId || '');
     
     try {
       const pendingOrder = JSON.parse(localStorage.getItem('pending_order'));
@@ -824,7 +860,8 @@ export default function App() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          transactionId: txnId,
+          transactionId: uropayOrderDetails.uroPayOrderId,
+          referenceNumber: utrNumber.trim(),
           order: pendingOrder
         })
       });
@@ -832,29 +869,154 @@ export default function App() {
       const resJson = await response.json();
       
       if (resJson.success) {
+        // Start polling for payment status
+        startPaymentPolling(uropayOrderDetails.uroPayOrderId);
+      } else {
+        alert('Failed to submit UTR: ' + (resJson.error || 'Unknown error'));
+        setPaymentResult('paying');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error submitting UTR: ' + err.message);
+      setPaymentResult('paying');
+    }
+  };
+
+  const startPaymentPolling = (uroPayOrderId) => {
+    let attempts = 0;
+    const maxAttempts = 24; // 2 minutes (every 5 seconds)
+    
+    const interval = setInterval(async () => {
+      attempts++;
+      if (attempts > maxAttempts) {
+        clearInterval(interval);
+        setPaymentResult('failed');
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${BACKEND_API_URL}/verify-payment`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            transactionId: uroPayOrderId
+          })
+        });
+        
+        const resJson = await response.json();
+        
+        if (resJson.success && resJson.status === 'PAID') {
+          clearInterval(interval);
+          
+          let orderPrice = 0;
+          try {
+            const pendingOrder = JSON.parse(localStorage.getItem('pending_order'));
+            if (pendingOrder && pendingOrder.price) {
+              orderPrice = pendingOrder.price;
+            }
+          } catch (e) {
+            console.error('Error reading pending order price:', e);
+          }
+
+          localStorage.removeItem('pending_order');
+          
+          // Store guest transaction ID locally for direct view on orders dashboard
+          try {
+            const guestTxns = JSON.parse(localStorage.getItem('shilajit_guest_txns') || '[]');
+            const txnToStore = resJson.transactionId || uroPayOrderId;
+            if (!guestTxns.includes(txnToStore)) {
+              guestTxns.push(txnToStore);
+              localStorage.setItem('shilajit_guest_txns', JSON.stringify(guestTxns));
+            }
+          } catch (e) {
+            console.error('Error saving guest txn:', e);
+          }
+          
+          // Trigger Meta Pixel Purchase track
+          if (window.fbq) {
+            window.fbq('track', 'Purchase', { value: orderPrice || 1499, currency: 'INR' });
+          }
+          
+          setPaymentResult('success');
+          fetchMyOrders();
+          
+          setTimeout(() => {
+            setIsCheckoutOpen(false);
+            setPaymentResult(null);
+            setUropayOrderDetails(null);
+            setUtrNumber('');
+            handleNavigate('orders');
+          }, 3000);
+        }
+      } catch (err) {
+        console.error('Error polling payment status:', err);
+      }
+    }, 5000);
+  };
+
+  const verifyTransaction = async (txnId) => {
+    setVerifyingTxnId(txnId);
+    setPaymentResult('verifying');
+    setIsCheckoutOpen(true);
+    
+    try {
+      const response = await fetch(`${BACKEND_API_URL}/verify-payment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          transactionId: txnId
+        })
+      });
+      
+      const resJson = await response.json();
+      
+      if (resJson.success && resJson.status === 'PAID') {
+        let orderPrice = 0;
+        try {
+          const pendingOrder = JSON.parse(localStorage.getItem('pending_order'));
+          if (pendingOrder && pendingOrder.price) {
+            orderPrice = pendingOrder.price;
+          }
+        } catch (e) {
+          console.error('Error reading pending order price:', e);
+        }
+
         localStorage.removeItem('pending_order');
         
         // Store guest transaction ID locally for direct view on orders dashboard
         try {
           const guestTxns = JSON.parse(localStorage.getItem('shilajit_guest_txns') || '[]');
-          if (!guestTxns.includes(txnId)) {
-            guestTxns.push(txnId);
+          const txnToStore = resJson.transactionId || txnId;
+          if (!guestTxns.includes(txnToStore)) {
+            guestTxns.push(txnToStore);
             localStorage.setItem('shilajit_guest_txns', JSON.stringify(guestTxns));
           }
         } catch (e) {
-          console.error('Error saving guest transaction ID locally:', e);
+          console.error('Error saving guest txn:', e);
+        }
+
+        // Trigger Meta Pixel Purchase track
+        if (window.fbq) {
+          window.fbq('track', 'Purchase', { value: orderPrice || 1499, currency: 'INR' });
         }
 
         setPaymentResult('success');
+        fetchMyOrders();
         
-        // Dynamic switch to My Orders Dashboard after 3 seconds showing success
         setTimeout(() => {
           setIsCheckoutOpen(false);
           setPaymentResult(null);
-          handleNavigate('orders');
+          if (activeView !== 'orders') {
+            handleNavigate('orders');
+          }
         }, 3000);
       } else {
-        setPaymentResult('failed');
+        // If it's not verified, start polling
+        startPaymentPolling(txnId);
       }
     } catch (err) {
       console.error(err);
@@ -1050,6 +1212,30 @@ export default function App() {
       const data = await res.json();
       if (data.success) {
         setAdminOrders(prev => prev.map(o => o._id === orderId ? { ...o, deliveryStatus: newStatus } : o));
+        fetchAdminData(); // Refresh stats too
+      } else {
+        alert('Failed to update: ' + data.error);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error updating status');
+    }
+  };
+
+  const handleMarkAsPaid = async (orderId) => {
+    if (!window.confirm("Are you sure you want to mark this order as PAID manually?")) return;
+    try {
+      const res = await fetch(`${BACKEND_API_URL}/admin/orders/${orderId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        },
+        body: JSON.stringify({ paymentStatus: 'PAID' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAdminOrders(prev => prev.map(o => o._id === orderId ? { ...o, paymentStatus: 'PAID' } : o));
         fetchAdminData(); // Refresh stats too
       } else {
         alert('Failed to update: ' + data.error);
@@ -3199,7 +3385,7 @@ export default function App() {
                   
                   <h3 style={{ fontSize: '18px', color: 'var(--earth)', fontWeight: 700, marginTop: '12px' }}>2. Information We Collect</h3>
                   <p>The personal information that you are asked to provide, and the reasons why you are asked to provide it, will be made clear to you at the point we ask you to provide your personal information.</p>
-                  <p>If you purchase products from us, we collect shipping details (name, delivery address, phone numbers) to successfully fulfill your order. Payments are processed securely via our trusted payment gateway partner PhonePe, and we do not store your credit card or raw banking credentials on our servers.</p>
+                  <p>If you purchase products from us, we collect shipping details (name, delivery address, phone numbers) to successfully fulfill your order. Payments are processed securely via our trusted payment gateway partner UroPay, and we do not store your credit card or raw banking credentials on our servers.</p>
                   
                   <h3 style={{ fontSize: '18px', color: 'var(--earth)', fontWeight: 700, marginTop: '12px' }}>3. How We Use Your Information</h3>
                   <p>We use the information we collect in various ways, including to:</p>
@@ -3214,7 +3400,7 @@ export default function App() {
                   <p>Apasya follows a standard procedure of using log files. These files log visitors when they visit websites. The information collected by log files includes internet protocol (IP) addresses, browser type, Internet Service Provider (ISP), date and time stamp, referring/exit pages, and possibly the number of clicks. These are not linked to any information that is personally identifiable.</p>
                   
                   <h3 style={{ fontSize: '18px', color: 'var(--earth)', fontWeight: 700, marginTop: '12px' }}>5. Third Party Privacy Policies</h3>
-                  <p>Apasya's Privacy Policy does not apply to other advertisers or websites. Thus, we are advising you to consult the respective Privacy Policies of these third-party servers like Google (for OAuth) and PhonePe (for payment gateways) for more detailed information.</p>
+                  <p>Apasya's Privacy Policy does not apply to other advertisers or websites. Thus, we are advising you to consult the respective Privacy Policies of these third-party servers like Google (for OAuth) and UroPay (for payment gateways) for more detailed information.</p>
                   
                   <h3 style={{ fontSize: '18px', color: 'var(--earth)', fontWeight: 700, marginTop: '12px' }}>6. Contact Us</h3>
                   <p>If you have additional questions or require more information about our Privacy Policy, do not hesitate to contact us at <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: '#B87333', textDecoration: 'none', fontWeight: 600 }}>{CONTACT_EMAIL}</a>.</p>
@@ -3389,13 +3575,31 @@ export default function App() {
                               <div className="order-card__product-details">
                                 <h4 style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>{order.productName}</h4>
                                 <p style={{ fontSize: 13, color: 'var(--muted)' }}>Quantity: {order.quantity} · Pack size: {grams}</p>
-                                <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+                                <div style={{ display: 'flex', gap: 10, marginTop: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                                   <span style={{ fontSize: 11, background: 'var(--earth)', color: 'white', padding: '2px 8px', borderRadius: 4, fontWeight: 600 }}>
                                     PAYMENT: {order.paymentStatus}
                                   </span>
                                   <span style={{ fontSize: 11, background: 'var(--gold)', color: 'white', padding: '2px 8px', borderRadius: 4, fontWeight: 600 }}>
                                     STATUS: {order.deliveryStatus}
                                   </span>
+                                  {order.paymentStatus === 'PENDING' && (
+                                    <button 
+                                      className="btn btn--outline" 
+                                      style={{ 
+                                        padding: '3px 8px', 
+                                        fontSize: 10, 
+                                        minHeight: 'unset', 
+                                        width: 'auto',
+                                        margin: 0,
+                                        border: '1px solid var(--earth)',
+                                        color: 'var(--earth)',
+                                        cursor: 'pointer'
+                                      }} 
+                                      onClick={() => verifyTransaction(order.txnId)}
+                                    >
+                                      Verify Status
+                                    </button>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -3591,7 +3795,7 @@ export default function App() {
                       <div className="admin-stat-card">
                         <div className="admin-stat-card__label">💰 Total Payments Received</div>
                         <div className="admin-stat-card__value">₹{adminStats.totalRevenue}</div>
-                        <span style={{ fontSize: 11, color: 'var(--green2)' }}>✓ 100% verified via PhonePe</span>
+                        <span style={{ fontSize: 11, color: 'var(--green2)' }}>✓ 100% verified via UroPay</span>
                       </div>
                       <div className="admin-stat-card">
                         <div className="admin-stat-card__label">📦 Paid Orders Count</div>
@@ -3675,6 +3879,25 @@ export default function App() {
                               }}>
                                 {order.paymentStatus}
                               </span>
+                              {order.paymentStatus !== 'PAID' && (
+                                <button 
+                                  className="btn btn--outline" 
+                                  style={{ 
+                                    display: 'block', 
+                                    padding: '2px 6px', 
+                                    fontSize: 9, 
+                                    marginTop: 6, 
+                                    minHeight: 'unset', 
+                                    width: 'auto',
+                                    cursor: 'pointer',
+                                    border: '1px solid #ef4444',
+                                    color: '#ef4444'
+                                  }}
+                                  onClick={() => handleMarkAsPaid(order._id)}
+                                >
+                                  Mark Paid
+                                </button>
+                              )}
                             </td>
                             <td>
                               {order.paymentStatus === 'PAID' ? (
@@ -4146,9 +4369,84 @@ export default function App() {
                 <div className="spinner"></div>
                 <h3 className="h3" style={{ margin: '12px 0 6px' }}>Verifying Payment</h3>
                 <p className="body-text" style={{ textAlign: 'center' }}>
-                  Please wait while we verify your transaction status with PhonePe. Do not refresh or close this window.
+                  Please wait while we verify your transaction status with UroPay. Do not refresh or close this window.
                 </p>
-                <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 10 }}>Transaction ID: {verifyingTxnId}</p>
+                <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 10 }}>UroPay Order ID: {verifyingTxnId}</p>
+              </div>
+            )}
+
+            {paymentResult === 'paying' && uropayOrderDetails && (
+              <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <h3 className="h3" style={{ margin: '0 0 4px', color: 'var(--ink)' }}>UPI Payment via UroPay</h3>
+                <p className="body-text" style={{ fontSize: 13, marginBottom: 8 }}>
+                  Scan the QR code below using any UPI app (GPay, PhonePe, Paytm, BHIM) to make a payment of <strong>₹{uropayOrderDetails.amountInRupees}</strong> directly to our bank.
+                </p>
+
+                {/* QR Code image */}
+                <div style={{ display: 'flex', justifyContent: 'center', margin: '8px 0' }}>
+                  <img 
+                    src={uropayOrderDetails.qrCode} 
+                    alt="UPI Payment QR Code" 
+                    style={{ width: 200, height: 200, borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', border: '1px solid var(--border)' }} 
+                  />
+                </div>
+
+                {/* Mobile Deep Link Button */}
+                {/Android|iPhone|iPad/i.test(navigator.userAgent) && (
+                  <a 
+                    href={uropayOrderDetails.upiString} 
+                    className="btn btn--earth-solid"
+                    style={{ textDecoration: 'none', display: 'inline-flex', justifyContent: 'center', alignItems: 'center', gap: 8, fontSize: 14, padding: '12px 20px', width: '100%', margin: '4px 0' }}
+                  >
+                    📱 Pay via UPI App
+                  </a>
+                )}
+
+                <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, textAlign: 'left' }}>
+                  <h4 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', color: 'var(--ink)', marginBottom: 8 }}>
+                    Step 2: Enter UPI Reference Number (UTR)
+                  </h4>
+                  <p className="body-text" style={{ fontSize: 12, marginBottom: 12 }}>
+                    After completing the payment in your UPI app, find the 12-digit transaction ID / UTR / UPI Reference Number and enter it below to confirm your order.
+                  </p>
+
+                  <form onSubmit={handleUtrSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <input
+                      type="text"
+                      maxLength="12"
+                      placeholder="Enter 12-digit UTR Number"
+                      value={utrNumber}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, ''); // numbers only
+                        setUtrNumber(val);
+                        if (utrError) setUtrError('');
+                      }}
+                      className={`form-input ${utrError ? 'form-input--error' : ''}`}
+                      style={{ fontSize: 14, padding: '10px 12px' }}
+                    />
+                    {utrError && <span className="form-error-msg" style={{ fontSize: 11 }}>{utrError}</span>}
+
+                    <button 
+                      type="submit" 
+                      className="btn btn--gold"
+                      style={{ padding: '12px', fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer', marginTop: 4 }}
+                    >
+                      Verify Payment
+                    </button>
+                  </form>
+                </div>
+
+                <button 
+                  className="btn btn--outline" 
+                  onClick={() => {
+                    setPaymentResult(null);
+                    setUropayOrderDetails(null);
+                    setUtrNumber('');
+                  }}
+                  style={{ width: '100%', padding: '10px', fontSize: 13, border: '1.5px solid var(--border)', background: 'transparent', color: 'var(--muted)', marginTop: 8 }}
+                >
+                  ← Go Back / Cancel
+                </button>
               </div>
             )}
 
@@ -4324,7 +4622,7 @@ export default function App() {
                       </>
                     ) : (
                       <>
-                        Pay ₹{selectedProduct.price} via PhonePe
+                        Place Order & Pay via UPI (UroPay)
                       </>
                     )}
                   </button>
@@ -4333,7 +4631,7 @@ export default function App() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontSize: 11, color: 'var(--muted)', marginTop: 16 }}>
                   <span>🔒 Secure SSL Encrypted Gateway</span>
                   <span style={{ color: 'var(--border)' }}>|</span>
-                  <span>Powered by PhonePe</span>
+                  <span>Powered by UroPay</span>
                 </div>
               </div>
             )}
