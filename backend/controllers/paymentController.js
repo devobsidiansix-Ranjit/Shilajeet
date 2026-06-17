@@ -27,6 +27,21 @@ export const initiatePayment = async (req, res) => {
     const txnId = "TXN" + Date.now();
     const amountInPaise = Math.round(order.price * 100);
 
+    // Clean up duplicate pending orders for the same customer phone and product
+    try {
+      const deleteResult = await Order.deleteMany({
+        phone1: order.phone1,
+        productName: order.productName,
+        paymentStatus: 'PENDING',
+        submittedUTR: { $exists: false }
+      });
+      if (deleteResult.deletedCount > 0) {
+        console.log(`Cleaned up ${deleteResult.deletedCount} duplicate pending orders for phone ${order.phone1}`);
+      }
+    } catch (cleanupErr) {
+      console.error("Failed to clean up duplicate pending orders:", cleanupErr);
+    }
+
     // Save initial order in MongoDB
     let newOrder;
     try {
@@ -337,9 +352,15 @@ function verifyWebhookSignature(payload, secret, signature) {
     : buildTransactionPayload(payload);
 
   const hashedSecret = sha512(secret);
+  const payloadString = JSON.stringify(ordered);
   const computed = crypto.createHmac('sha256', hashedSecret)
-    .update(JSON.stringify(ordered))
+    .update(payloadString)
     .digest('hex');
+
+  console.log("UroPay Webhook Signature Debug:");
+  console.log("- Ordered payload used:", payloadString);
+  console.log("- Computed signature:", computed);
+  console.log("- Received signature:", signature);
 
   if (computed.length !== signature.length) {
     return false;
@@ -363,7 +384,11 @@ export const uropayWebhook = async (req, res) => {
     const { event, uroPayOrderId, merchantOrderId, orderStatus } = payload;
 
     // Handle events
-    if (event === 'companion.sms.data' || (event === 'order.status.changed' && orderStatus === 'COMPLETED')) {
+    if (
+      event === 'companion.sms.data' || 
+      (event === 'order.status.changed' && (orderStatus === 'COMPLETED' || orderStatus === 'PAID' || orderStatus === 'SUCCESS')) ||
+      event === 'order.status.completed'
+    ) {
       // Payment Completed! Find order by merchantOrderId (which matches our txnId) or uroPayOrderId
       const dbOrder = await Order.findOne({
         $or: [{ txnId: merchantOrderId }, { uroPayOrderId: uroPayOrderId }]
